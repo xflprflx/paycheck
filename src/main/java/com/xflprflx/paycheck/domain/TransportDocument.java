@@ -1,27 +1,61 @@
 package com.xflprflx.paycheck.domain;
 
+import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 
 
 
-public class TransportDocument {
+@Entity
+@Table(name = "TransportDocument")
+public class TransportDocument implements Serializable {
+	private static final long serialVersionUID = 1L;
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+	@Column(unique = true)
 	private String number;
 	private String serie;
 	private Double amount;
+	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate issueDate;
+	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate paymentDate;
+	@Enumerated(EnumType.STRING)
 	private PaymentStatus paymentStatus;
+	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate createdAt;
+	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate updatedAt;
 	
+	@ElementCollection(fetch = FetchType.EAGER)
+	@ManyToMany
+	@JoinTable(name = "tb_transport_document_invoice",
+		joinColumns = @JoinColumn(name = "transport_document_id"),
+		inverseJoinColumns = @JoinColumn(name = "invoice_id"))
+    private Set<Invoice> invoices = new HashSet<>();
 	
 	public TransportDocument() {
 	}
@@ -87,7 +121,7 @@ public class TransportDocument {
 	}
 
 	public PaymentStatus getPaymentStatus() {
-		return paymentStatus;
+		return PaymentStatus.toEnum(paymentStatus.getCode());
 	}
 
 	public void setPaymentStatus(PaymentStatus paymentStatus) {
@@ -108,6 +142,14 @@ public class TransportDocument {
 
 	public void setUpdatedAt(LocalDate updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+	
+	public Set<Invoice> getInvoices() {
+		return invoices;
+	}
+
+	public void setInvoices(Set<Invoice> invoices) {
+		this.invoices = invoices;
 	}
 
 	@PrePersist
