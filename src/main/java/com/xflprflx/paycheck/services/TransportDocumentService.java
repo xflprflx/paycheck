@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.xflprflx.paycheck.domain.TransportDocument;
 import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
+import com.xflprflx.paycheck.services.exceptions.ObjectNotFoundException;
 
 @Service
 public class TransportDocumentService {
@@ -16,6 +17,6 @@ public class TransportDocumentService {
 	
 	public TransportDocument findById(Integer id) {
 		Optional<TransportDocument> obj = transportDocumentRepository.findById(id);
-		return obj.orElse(null);
+		return obj.orElseThrow(() -> new ObjectNotFoundException("Documento não encontrado! Id: " + id));
 	}
 }
