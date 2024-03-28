@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -41,9 +40,9 @@ public class Invoice implements Serializable {
 	private LocalDate createdAt;
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate updatedAt;
+
 	
-	//@ElementCollection(fetch = FetchType.EAGER)
-	@ManyToMany(mappedBy = "invoices")
+	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "invoices")
 	private Set<TransportDocument> transportDocuments = new HashSet<>();
 	
 	public Invoice() {

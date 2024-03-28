@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -50,8 +49,7 @@ public class TransportDocument implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate updatedAt;
 	
-	//@ElementCollection(fetch = FetchType.EAGER)
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "tb_transport_document_invoice",
 		joinColumns = @JoinColumn(name = "transport_document_id"),
 		inverseJoinColumns = @JoinColumn(name = "invoice_id"))
