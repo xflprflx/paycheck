@@ -1,5 +1,6 @@
 package com.xflprflx.paycheck.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,5 +19,9 @@ public class TransportDocumentService {
 	public TransportDocument findById(Integer id) {
 		Optional<TransportDocument> obj = transportDocumentRepository.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException("Documento não encontrado! Id: " + id));
+	}
+
+	public List<TransportDocument> findAll() {
+		return transportDocumentRepository.findAll();
 	}
 }

@@ -1,5 +1,8 @@
 package com.xflprflx.paycheck.controllers;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,5 +25,12 @@ public class TransportDocumentController {
 	public ResponseEntity<TransportDocumentDTO> findById(@PathVariable Integer id) {
 		TransportDocument obj = transportDocumentService.findById(id);
 		return ResponseEntity.ok().body(new TransportDocumentDTO(obj, obj.getInvoices()));
+	}
+	
+	@GetMapping
+	public ResponseEntity<List<TransportDocumentDTO>> findAll() {
+		List<TransportDocument> list = transportDocumentService.findAll();
+		List<TransportDocumentDTO> listDto = list.stream().map(obj -> new TransportDocumentDTO(obj, obj.getInvoices())).collect(Collectors.toList());
+		return ResponseEntity.ok().body(listDto);
 	}
 }
