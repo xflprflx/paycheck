@@ -28,7 +28,7 @@ import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 
 
 @Entity
-@Table(name = "TransportDocument")
+@Table(name = "tb_transport_document")
 public class TransportDocument implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -50,7 +50,7 @@ public class TransportDocument implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate updatedAt;
 	
-	@ElementCollection(fetch = FetchType.EAGER)
+	//@ElementCollection(fetch = FetchType.EAGER)
 	@ManyToMany
 	@JoinTable(name = "tb_transport_document_invoice",
 		joinColumns = @JoinColumn(name = "transport_document_id"),

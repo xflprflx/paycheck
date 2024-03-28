@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.xflprflx.paycheck.domain.enums.DeliveryStatus;
 
 @Entity
-@Table(name = "Invoice")
+@Table(name = "tb_invoice")
 public class Invoice implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -42,16 +42,14 @@ public class Invoice implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate updatedAt;
 	
-	@ElementCollection(fetch = FetchType.EAGER)
+	//@ElementCollection(fetch = FetchType.EAGER)
 	@ManyToMany(mappedBy = "invoices")
 	private Set<TransportDocument> transportDocuments = new HashSet<>();
 	
 	public Invoice() {
 	}
 
-	public Invoice(
-			Integer id, String number, DeliveryStatus deliveryStatus, LocalDate scannedDate, LocalDate createdAt,
-			LocalDate updatedAt) {
+	public Invoice(Integer id, String number, DeliveryStatus deliveryStatus, LocalDate scannedDate) {
 		this.id = id;
 		this.number = number;
 		this.deliveryStatus = deliveryStatus;
