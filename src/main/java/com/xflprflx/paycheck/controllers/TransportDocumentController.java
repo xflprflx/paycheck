@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.xflprflx.paycheck.domain.TransportDocument;
+import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 import com.xflprflx.paycheck.services.TransportDocumentService;
 
 @RestController
@@ -18,8 +19,8 @@ public class TransportDocumentController {
 	private TransportDocumentService transportDocumentService;
 	
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<TransportDocument> findById(@PathVariable Integer id) {
+	public ResponseEntity<TransportDocumentDTO> findById(@PathVariable Integer id) {
 		TransportDocument obj = transportDocumentService.findById(id);
-		return ResponseEntity.ok().body(obj);
+		return ResponseEntity.ok().body(new TransportDocumentDTO(obj, obj.getInvoices()));
 	}
 }

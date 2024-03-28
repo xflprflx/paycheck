@@ -21,12 +21,12 @@ public enum PaymentStatus {
 		return description;
 	}
 	
-	public static PaymentStatus toEnum(Integer cod) {
-		if(cod == null) {
+	public static PaymentStatus toEnum(String description) {
+		if(description == null) {
 			return null;
 		}
 		for(PaymentStatus x : PaymentStatus.values()) {
-			if(cod.equals(x.getCode())) {
+			if(description.equals(x.getDescription())) {
 				return x;
 			}
 		}

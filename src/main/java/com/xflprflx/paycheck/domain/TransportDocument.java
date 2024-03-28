@@ -120,7 +120,7 @@ public class TransportDocument implements Serializable {
 	}
 
 	public PaymentStatus getPaymentStatus() {
-		return PaymentStatus.toEnum(paymentStatus.getCode());
+		return paymentStatus;
 	}
 
 	public void setPaymentStatus(PaymentStatus paymentStatus) {

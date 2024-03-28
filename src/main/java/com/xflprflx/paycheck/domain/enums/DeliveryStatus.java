@@ -18,12 +18,12 @@ public enum DeliveryStatus {
 		return description;
 	}
 	
-	public static DeliveryStatus toEnum(Integer cod) {
-		if(cod == null) {
+	public static DeliveryStatus toEnum(String description) {
+		if(description == null) {
 			return null;
 		}
 		for(DeliveryStatus x : DeliveryStatus.values()) {
-			if(cod.equals(x.getCode())) {
+			if(description.equals(x.getDescription())) {
 				return x;
 			}
 		}
