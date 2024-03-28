@@ -22,10 +22,11 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 
 
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "tb_transport_document")
 public class TransportDocument implements Serializable {
@@ -49,7 +50,7 @@ public class TransportDocument implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate updatedAt;
 	
-	@ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "tb_transport_document_invoice",
 		joinColumns = @JoinColumn(name = "transport_document_id"),
 		inverseJoinColumns = @JoinColumn(name = "invoice_id"))

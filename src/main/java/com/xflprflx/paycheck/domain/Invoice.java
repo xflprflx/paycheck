@@ -10,7 +10,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,8 +19,11 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.xflprflx.paycheck.domain.enums.DeliveryStatus;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "tb_invoice")
 public class Invoice implements Serializable {
@@ -42,7 +44,8 @@ public class Invoice implements Serializable {
 	private LocalDate updatedAt;
 
 	
-	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "invoices")
+	@ManyToMany(mappedBy = "invoices")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private Set<TransportDocument> transportDocuments = new HashSet<>();
 	
 	public Invoice() {

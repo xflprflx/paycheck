@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.xflprflx.paycheck.domain.Invoice;
 import com.xflprflx.paycheck.domain.TransportDocument;
+import com.xflprflx.paycheck.domain.enums.DeliveryStatus;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 import com.xflprflx.paycheck.repositories.InvoiceRepository;
 import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
@@ -24,11 +25,11 @@ public class DBService {
 	private InvoiceRepository invoiceRepository;
 	
 	public void instanceDB() {
-		Invoice invoice1 = new Invoice(null, "55", null, LocalDate.now());
-		Invoice invoice2 = new Invoice(null, "56", null, LocalDate.now());
+		Invoice invoice1 = new Invoice(null, "55", DeliveryStatus.DELIVERED, LocalDate.now());
+		Invoice invoice2 = new Invoice(null, "56", DeliveryStatus.DELIVERED, LocalDate.now());
 		List<Invoice> invoices = invoiceRepository.saveAll(Arrays.asList(invoice1, invoice2));
 		
-		TransportDocument transportDocument = new TransportDocument(null, "151", "11", 200.0, null, null, PaymentStatus.SCAN_PENDING);
+		TransportDocument transportDocument = new TransportDocument(null, "151", "11", 200.0, LocalDate.now(), LocalDate.now(), PaymentStatus.SCAN_PENDING);
 		invoices.forEach(x -> transportDocument.getInvoices().add(x));
 //		transportDocument.getInvoices().add(invoice);
 		transportDocumentRepository.saveAll(Arrays.asList(transportDocument));
