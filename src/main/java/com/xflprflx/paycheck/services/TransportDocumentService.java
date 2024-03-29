@@ -3,6 +3,7 @@ package com.xflprflx.paycheck.services;
 import java.util.List;
 import java.util.Optional;
 
+import com.xflprflx.paycheck.services.exceptions.DataIntegrityViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,15 @@ public class TransportDocumentService {
 
 	public TransportDocument create(TransportDocumentDTO transportDocumentDTO) {
 		transportDocumentDTO.setId(null);
+		validByNumber(transportDocumentDTO);
 		TransportDocument transportDocument = new TransportDocument(transportDocumentDTO);
 		return transportDocumentRepository.save(transportDocument);
+	}
+
+	private void validByNumber(TransportDocumentDTO transportDocumentDTO) {
+		Optional<TransportDocument> transportDocument = transportDocumentRepository.findByNumber(transportDocumentDTO.getNumber());
+		if (transportDocument.isPresent() && transportDocument.get().getId() != transportDocumentDTO.getId()) {
+			throw new DataIntegrityViolationException("Documento já cadastrado no sistema");
+		}
 	}
 }
