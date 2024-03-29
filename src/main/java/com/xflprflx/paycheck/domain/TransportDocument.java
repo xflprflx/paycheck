@@ -23,6 +23,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 
 
@@ -71,6 +72,17 @@ public class TransportDocument implements Serializable {
 		this.paymentStatus = paymentStatus;
 	}
 
+	public TransportDocument(TransportDocumentDTO transportDocumentDTO) {
+		this.id = transportDocumentDTO.getId();
+		this.number = transportDocumentDTO.getNumber();
+		this.serie = transportDocumentDTO.getSerie();
+		this.amount = transportDocumentDTO.getAmount();
+		this.issueDate = transportDocumentDTO.getIssueDate();
+		this.paymentDate = transportDocumentDTO.getPaymentDate();
+		this.paymentStatus = transportDocumentDTO.getPaymentStatus();
+		transportDocumentDTO.getInvoices().forEach(invoiceDto -> this.invoices.add(new Invoice(invoiceDto)));
+	}
+	
 	public Integer getId() {
 		return id;
 	}

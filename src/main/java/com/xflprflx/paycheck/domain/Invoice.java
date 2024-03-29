@@ -20,6 +20,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
 import com.xflprflx.paycheck.domain.enums.DeliveryStatus;
 
 @Entity
@@ -54,6 +55,13 @@ public class Invoice implements Serializable {
 		this.number = number;
 		this.deliveryStatus = deliveryStatus;
 		this.scannedDate = scannedDate;
+	}
+	
+	public Invoice(InvoiceDTO invoiceDTO) {
+		this.id = invoiceDTO.getId();
+		this.number = invoiceDTO.getNumber();
+		this.deliveryStatus = invoiceDTO.getDeliveryStatus();
+		this.scannedDate = invoiceDTO.getScannedDate();
 	}
 
 	public Integer getId() {
