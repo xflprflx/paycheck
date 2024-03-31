@@ -18,6 +18,8 @@ import com.xflprflx.paycheck.domain.TransportDocument;
 import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 import com.xflprflx.paycheck.services.TransportDocumentService;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping(value = "/transportDocuments")
 public class TransportDocumentController {
@@ -40,7 +42,7 @@ public class TransportDocumentController {
 	}
 
 	@PostMapping
-	public ResponseEntity<TransportDocumentDTO> create(@RequestBody TransportDocumentDTO transportDocumentDTO) {
+	public ResponseEntity<TransportDocumentDTO> create(@Valid @RequestBody TransportDocumentDTO transportDocumentDTO) {
 		TransportDocument newObj = transportDocumentService.create(transportDocumentDTO);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newObj.getId()).toUri();
 		return ResponseEntity.created(uri).build();

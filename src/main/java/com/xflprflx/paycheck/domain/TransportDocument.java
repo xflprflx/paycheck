@@ -40,8 +40,11 @@ public class TransportDocument implements Serializable {
 	private String number;
 	private String serie;
 	private Double amount;
+	private String cnpjShipper;
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate issueDate;
+	@JsonFormat(pattern = "dd/MM/yyyy")
+	private LocalDate paymentForecast;
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate paymentDate;
 	@Enumerated(EnumType.STRING)
@@ -60,14 +63,14 @@ public class TransportDocument implements Serializable {
 	public TransportDocument() {
 	}
 
-	public TransportDocument(
-			Integer id, String number, String serie, Double amount, LocalDate issueDate,
-			LocalDate paymentDate, PaymentStatus paymentStatus) {
+	public TransportDocument(Integer id, String number, String serie, Double amount, String cnpjShipper, LocalDate issueDate, LocalDate paymentForecast, LocalDate paymentDate, PaymentStatus paymentStatus) {
 		this.id = id;
 		this.number = number;
 		this.serie = serie;
 		this.amount = amount;
+		this.cnpjShipper = cnpjShipper;
 		this.issueDate = issueDate;
+		this.paymentForecast = paymentForecast;
 		this.paymentDate = paymentDate;
 		this.paymentStatus = paymentStatus;
 	}
@@ -77,7 +80,9 @@ public class TransportDocument implements Serializable {
 		this.number = transportDocumentDTO.getNumber();
 		this.serie = transportDocumentDTO.getSerie();
 		this.amount = transportDocumentDTO.getAmount();
+		this.cnpjShipper = transportDocumentDTO.getCnpjShipper();
 		this.issueDate = transportDocumentDTO.getIssueDate();
+		this.paymentForecast = transportDocumentDTO.getPaymentForecast();
 		this.paymentDate = transportDocumentDTO.getPaymentDate();
 		this.paymentStatus = transportDocumentDTO.getPaymentStatus();
 		transportDocumentDTO.getInvoices().forEach(invoiceDto -> this.invoices.add(new Invoice(invoiceDto)));
@@ -161,6 +166,22 @@ public class TransportDocument implements Serializable {
 
 	public void setInvoices(Set<Invoice> invoices) {
 		this.invoices = invoices;
+	}
+
+	public String getCnpjShipper() {
+		return cnpjShipper;
+	}
+
+	public void setCnpjShipper(String cnpjShipper) {
+		this.cnpjShipper = cnpjShipper;
+	}
+
+	public LocalDate getPaymentForecast() {
+		return paymentForecast;
+	}
+
+	public void setPaymentForecast(LocalDate paymentForecast) {
+		this.paymentForecast = paymentForecast;
 	}
 
 	@PrePersist
