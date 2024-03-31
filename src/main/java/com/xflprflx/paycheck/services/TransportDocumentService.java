@@ -34,10 +34,20 @@ public class TransportDocumentService {
 		return transportDocumentRepository.save(transportDocument);
 	}
 
+	public TransportDocument update(Integer id, TransportDocumentDTO transportDocumentDTO) {
+		transportDocumentDTO.setId(id);
+		TransportDocument obj = findById(id);
+		validByNumber(transportDocumentDTO);
+		obj = new TransportDocument(transportDocumentDTO);
+		return transportDocumentRepository.save(obj);
+	}
+
 	private void validByNumber(TransportDocumentDTO transportDocumentDTO) {
 		Optional<TransportDocument> transportDocument = transportDocumentRepository.findByNumber(transportDocumentDTO.getNumber());
 		if (transportDocument.isPresent() && transportDocument.get().getId() != transportDocumentDTO.getId()) {
 			throw new DataIntegrityViolationException("Documento já cadastrado no sistema");
 		}
 	}
+
+
 }
