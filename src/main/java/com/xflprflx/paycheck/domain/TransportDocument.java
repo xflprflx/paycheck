@@ -2,6 +2,7 @@ package com.xflprflx.paycheck.domain;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -40,7 +41,7 @@ public class TransportDocument implements Serializable {
 	private String number;
 	private String serie;
 	private Double amount;
-	private String cnpjShipper;
+	private String addressShipper;
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate issueDate;
 	@JsonFormat(pattern = "dd/MM/yyyy")
@@ -63,12 +64,12 @@ public class TransportDocument implements Serializable {
 	public TransportDocument() {
 	}
 
-	public TransportDocument(Integer id, String number, String serie, Double amount, String cnpjShipper, LocalDate issueDate, LocalDate paymentForecast, LocalDate paymentDate, PaymentStatus paymentStatus) {
+	public TransportDocument(Integer id, String number, String serie, Double amount, String addressShipper, LocalDate issueDate, LocalDate paymentForecast, LocalDate paymentDate, PaymentStatus paymentStatus) {
 		this.id = id;
 		this.number = number;
 		this.serie = serie;
 		this.amount = amount;
-		this.cnpjShipper = cnpjShipper;
+		this.addressShipper = addressShipper;
 		this.issueDate = issueDate;
 		this.paymentForecast = paymentForecast;
 		this.paymentDate = paymentDate;
@@ -80,7 +81,7 @@ public class TransportDocument implements Serializable {
 		this.number = transportDocumentDTO.getNumber();
 		this.serie = transportDocumentDTO.getSerie();
 		this.amount = transportDocumentDTO.getAmount();
-		this.cnpjShipper = transportDocumentDTO.getCnpjShipper();
+		this.addressShipper = transportDocumentDTO.getAddressShipper();
 		this.issueDate = transportDocumentDTO.getIssueDate();
 		this.paymentForecast = transportDocumentDTO.getPaymentForecast();
 		this.paymentDate = transportDocumentDTO.getPaymentDate();
@@ -168,12 +169,12 @@ public class TransportDocument implements Serializable {
 		this.invoices = invoices;
 	}
 
-	public String getCnpjShipper() {
-		return cnpjShipper;
+	public String getAddressShipper() {
+		return addressShipper;
 	}
 
-	public void setCnpjShipper(String cnpjShipper) {
-		this.cnpjShipper = cnpjShipper;
+	public void setAddressShipper(String addressShipper) {
+		this.addressShipper = addressShipper;
 	}
 
 	public LocalDate getPaymentForecast() {

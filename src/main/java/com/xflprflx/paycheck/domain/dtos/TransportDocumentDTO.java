@@ -1,18 +1,17 @@
 package com.xflprflx.paycheck.domain.dtos;
 
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.xflprflx.paycheck.domain.Invoice;
 import com.xflprflx.paycheck.domain.TransportDocument;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TransportDocumentDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -25,7 +24,7 @@ public class TransportDocumentDTO implements Serializable {
 	@NotNull(message = "O campo valor do frete é requerido")
 	private Double amount;
 	@NotNull(message = "O campo CNPJ é requerido")
-	private String cnpjShipper;
+	private String addressShipper;
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate issueDate;
 	@JsonFormat(pattern = "dd/MM/yyyy")
@@ -44,7 +43,7 @@ public class TransportDocumentDTO implements Serializable {
 		this.number = transportDocument.getNumber();
 		this.serie = transportDocument.getSerie();
 		this.amount = transportDocument.getAmount();
-		this.cnpjShipper = transportDocument.getCnpjShipper();
+		this.addressShipper = transportDocument.getAddressShipper();
 		this.issueDate = transportDocument.getIssueDate();
 		this.paymentForecast = transportDocument.getPaymentForecast();
 		this.paymentDate = transportDocument.getPaymentDate();
@@ -96,6 +95,10 @@ public class TransportDocumentDTO implements Serializable {
 		this.issueDate = issueDate;
 	}
 
+	public void setIssueDate(String issueDateStr) {
+		DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+		this.issueDate = LocalDate.parse(issueDateStr, formatter);
+	}
 	public LocalDate getPaymentDate() {
 		return paymentDate;
 	}
@@ -116,12 +119,12 @@ public class TransportDocumentDTO implements Serializable {
 		return invoices;
 	}
 
-	public String getCnpjShipper() {
-		return cnpjShipper;
+	public String getAddressShipper() {
+		return addressShipper;
 	}
 
-	public void setCnpjShipper(String cnpjShipper) {
-		this.cnpjShipper = cnpjShipper;
+	public void setAddressShipper(String addressShipper) {
+		this.addressShipper = addressShipper;
 	}
 
 	public LocalDate getPaymentForecast() {

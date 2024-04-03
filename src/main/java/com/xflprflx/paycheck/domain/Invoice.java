@@ -38,6 +38,8 @@ public class Invoice implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate scannedDate;
 	@JsonFormat(pattern = "dd/MM/yyyy")
+	private LocalDate paymentApprovalDate;
+	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate createdAt;
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate updatedAt;
@@ -50,11 +52,12 @@ public class Invoice implements Serializable {
 	public Invoice() {
 	}
 
-	public Invoice(Integer id, String number, DeliveryStatus deliveryStatus, LocalDate scannedDate) {
+	public Invoice(Integer id, String number, DeliveryStatus deliveryStatus, LocalDate scannedDate, LocalDate paymentApprovalDate) {
 		this.id = id;
 		this.number = number;
 		this.deliveryStatus = deliveryStatus;
 		this.scannedDate = scannedDate;
+		this.paymentApprovalDate = paymentApprovalDate;
 	}
 	
 	public Invoice(InvoiceDTO invoiceDTO) {
@@ -62,6 +65,7 @@ public class Invoice implements Serializable {
 		this.number = invoiceDTO.getNumber();
 		this.deliveryStatus = invoiceDTO.getDeliveryStatus();
 		this.scannedDate = invoiceDTO.getScannedDate();
+		this.paymentApprovalDate = invoiceDTO.getPaymentApprovalDate();
 	}
 
 	public Integer getId() {
@@ -94,6 +98,14 @@ public class Invoice implements Serializable {
 
 	public void setScannedDate(LocalDate scannedDate) {
 		this.scannedDate = scannedDate;
+	}
+
+	public LocalDate getPaymentApprovalDate() {
+		return paymentApprovalDate;
+	}
+
+	public void setPaymentApprovalDate(LocalDate paymentApprovalDate) {
+		this.paymentApprovalDate = paymentApprovalDate;
 	}
 
 	public LocalDate getCreatedAt() {
