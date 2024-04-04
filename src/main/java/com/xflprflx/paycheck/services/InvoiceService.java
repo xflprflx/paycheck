@@ -3,14 +3,14 @@ package com.xflprflx.paycheck.services;
 import com.xflprflx.paycheck.domain.Invoice;
 import com.xflprflx.paycheck.domain.TransportDocument;
 import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
-import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
+import com.xflprflx.paycheck.domain.enums.DeliveryStatus;
 import com.xflprflx.paycheck.repositories.InvoiceRepository;
-import com.xflprflx.paycheck.services.exceptions.DataIntegrityViolationException;
-import com.xflprflx.paycheck.services.exceptions.ObjectNotFoundException;
+import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,28 +18,56 @@ import java.util.Optional;
 @Service
 public class InvoiceService {
 
-
-
 	@Autowired
 	private InvoiceRepository invoiceRepository;
 
+	@Autowired
+	private PaymentForecastCalculatorService paymentForecastCalculatorService;
+
+	@Autowired
+	private TransportDocumentRepository transportDocumentRepository;
+
+	@Transactional
 	public Optional<Invoice> findByNumber(String number) {
 		return invoiceRepository.findByNumber(number);
 	}
 
 	@Transactional
-    public void saveInvoices(List<InvoiceDTO> invoiceDTOS) {
+	public Invoice save(Invoice invoice) {
+		return invoiceRepository.save(invoice);
+	}
+
+	@Transactional
+	public void saveInvoices(List<InvoiceDTO> invoiceDTOS) {
 		List<Invoice> invoices = new ArrayList<>();
 		for (InvoiceDTO invoiceDTO : invoiceDTOS) {
-			Optional<Invoice> optionalInvoice = findByNumber(invoiceDTO.getNumber());
-			if(optionalInvoice.isPresent()) {
-				var oldInvoice = optionalInvoice.get();
-				var invoice = new Invoice(invoiceDTO);
+			findByNumber(invoiceDTO.getNumber()).ifPresent(oldInvoice -> {
+				Invoice invoice = new Invoice(invoiceDTO);
 				invoice.setId(oldInvoice.getId());
+				oldInvoice.getTransportDocuments().forEach(invoice.getTransportDocuments()::add);
+				if (invoiceDTO.getScannedDate() != null) {
+					invoice.setDeliveryStatus(DeliveryStatus.DELIVERED);
+				}
 				invoices.add(invoice);
-				invoiceDTO.setId(invoice.getId());
-			}
-			invoiceRepository.saveAll(invoices);
+			});
 		}
-    }
+		invoiceRepository.saveAll(invoices);
+		updatePaymentForecastIfNeeded(invoices);
+	}
+
+	private void updatePaymentForecastIfNeeded(List<Invoice> invoices) {
+		List<TransportDocument> transportDocumentsToUpdate = new ArrayList<>();
+		for (Invoice invoice : invoices) {
+			invoice.getTransportDocuments().forEach(transportDocumentsToUpdate::add);
+		}
+		for (TransportDocument transportDocument : transportDocumentsToUpdate) {
+			boolean allDelivered = transportDocument.getInvoices().stream()
+					.allMatch(invoice -> invoice.getDeliveryStatus() == DeliveryStatus.DELIVERED);
+			if (allDelivered) {
+				LocalDate newPaymentForecast = paymentForecastCalculatorService.calculateNewPaymentForecast(transportDocument);
+				transportDocument.setPaymentForecastByScannedDate(newPaymentForecast);
+				transportDocumentRepository.save(transportDocument);
+			}
+		}
+	}
 }

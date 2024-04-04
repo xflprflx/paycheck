@@ -3,9 +3,12 @@ package com.xflprflx.paycheck.domain.dtos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.xflprflx.paycheck.domain.Invoice;
+import com.xflprflx.paycheck.domain.Payment;
 import com.xflprflx.paycheck.domain.TransportDocument;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -30,9 +33,10 @@ public class TransportDocumentDTO implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate issueDate;
 	@JsonFormat(pattern = "dd/MM/yyyy")
-	private LocalDate paymentForecast;
+	private LocalDate paymentForecastByScannedDate;
 	@JsonFormat(pattern = "dd/MM/yyyy")
-	private LocalDate paymentDate;
+	private LocalDate paymentForecastByPaymentApprovalDate;
+	@Enumerated(EnumType.STRING)
 	private PaymentStatus paymentStatus;
 	private PaymentDTO paymentDTO;
 
@@ -48,9 +52,10 @@ public class TransportDocumentDTO implements Serializable {
 		this.amount = transportDocument.getAmount();
 		this.addressShipper = transportDocument.getAddressShipper();
 		this.issueDate = transportDocument.getIssueDate();
-		this.paymentForecast = transportDocument.getPaymentForecast();
-		this.paymentDate = transportDocument.getPaymentDate();
+		this.paymentForecastByScannedDate = transportDocument.getPaymentForecastByScannedDate();
+		this.paymentForecastByPaymentApprovalDate = transportDocument.getPaymentForecastByPaymentApprovalDate();
 		this.paymentStatus = transportDocument.getPaymentStatus();
+		this.paymentDTO = new PaymentDTO(transportDocument.getPayment());
 	}
 	
 	public TransportDocumentDTO(TransportDocument transportDocument, Set<Invoice> invoices) {
@@ -102,13 +107,6 @@ public class TransportDocumentDTO implements Serializable {
 		DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 		this.issueDate = LocalDate.parse(issueDateStr, formatter);
 	}
-	public LocalDate getPaymentDate() {
-		return paymentDate;
-	}
-
-	public void setPaymentDate(LocalDate paymentDate) {
-		this.paymentDate = paymentDate;
-	}
 
 	public PaymentStatus getPaymentStatus() {
 		return paymentStatus;
@@ -130,12 +128,20 @@ public class TransportDocumentDTO implements Serializable {
 		this.addressShipper = addressShipper;
 	}
 
-	public LocalDate getPaymentForecast() {
-		return paymentForecast;
+	public LocalDate getPaymentForecastByScannedDate() {
+		return paymentForecastByScannedDate;
 	}
 
-	public void setPaymentForecast(LocalDate paymentForecast) {
-		this.paymentForecast = paymentForecast;
+	public void setPaymentForecastByScannedDate(LocalDate paymentForecastByScannedDate) {
+		this.paymentForecastByScannedDate = paymentForecastByScannedDate;
+	}
+
+	public LocalDate getPaymentForecastByPaymentApprovalDate() {
+		return paymentForecastByPaymentApprovalDate;
+	}
+
+	public void setPaymentForecastByPaymentApprovalDate(LocalDate paymentForecastByPaymentApprovalDate) {
+		this.paymentForecastByPaymentApprovalDate = paymentForecastByPaymentApprovalDate;
 	}
 
 	public PaymentDTO getPaymentDTO() {
@@ -145,4 +151,6 @@ public class TransportDocumentDTO implements Serializable {
 	public void setPaymentDTO(PaymentDTO paymentDTO) {
 		this.paymentDTO = paymentDTO;
 	}
+
+
 }

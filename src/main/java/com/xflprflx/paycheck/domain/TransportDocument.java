@@ -32,9 +32,9 @@ public class TransportDocument implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate issueDate;
 	@JsonFormat(pattern = "dd/MM/yyyy")
-	private LocalDate paymentForecast;
+	private LocalDate paymentForecastByScannedDate;
 	@JsonFormat(pattern = "dd/MM/yyyy")
-	private LocalDate paymentDate;
+	private LocalDate paymentForecastByPaymentApprovalDate;
 	@Enumerated(EnumType.STRING)
 	private PaymentStatus paymentStatus;
 	
@@ -51,15 +51,15 @@ public class TransportDocument implements Serializable {
 	public TransportDocument() {
 	}
 
-	public TransportDocument(Integer id, String number, String serie, Double amount, String addressShipper, LocalDate issueDate, LocalDate paymentForecast, LocalDate paymentDate, PaymentStatus paymentStatus, Payment payment) {
+	public TransportDocument(Integer id, String number, String serie, Double amount, String addressShipper, LocalDate issueDate, LocalDate paymentForecastByScannedDate, LocalDate paymentForecastByPaymentApprovalDate, PaymentStatus paymentStatus, Payment payment) {
 		this.id = id;
 		this.number = number;
 		this.serie = serie;
 		this.amount = amount;
 		this.addressShipper = addressShipper;
 		this.issueDate = issueDate;
-		this.paymentForecast = paymentForecast;
-		this.paymentDate = paymentDate;
+		this.paymentForecastByScannedDate = paymentForecastByScannedDate;
+		this.paymentForecastByPaymentApprovalDate = paymentForecastByPaymentApprovalDate;
 		this.paymentStatus = paymentStatus;
 		this.payment = payment;
 	}
@@ -71,10 +71,10 @@ public class TransportDocument implements Serializable {
 		this.amount = transportDocumentDTO.getAmount();
 		this.addressShipper = transportDocumentDTO.getAddressShipper();
 		this.issueDate = transportDocumentDTO.getIssueDate();
-		this.paymentForecast = transportDocumentDTO.getPaymentForecast();
-		this.paymentDate = transportDocumentDTO.getPaymentDate();
+		this.paymentForecastByScannedDate = transportDocumentDTO.getPaymentForecastByScannedDate();
+		this.paymentForecastByPaymentApprovalDate = transportDocumentDTO.getPaymentForecastByPaymentApprovalDate();
 		this.paymentStatus = transportDocumentDTO.getPaymentStatus();
-		transportDocumentDTO.getInvoices().forEach(invoiceDto -> this.invoices.add(new Invoice(invoiceDto)));
+//		transportDocumentDTO.getInvoices().forEach(invoiceDto -> this.invoices.add(new Invoice(invoiceDto)));
 	}
 	
 	public Integer getId() {
@@ -117,14 +117,6 @@ public class TransportDocument implements Serializable {
 		this.issueDate = issueDate;
 	}
 
-	public LocalDate getPaymentDate() {
-		return paymentDate;
-	}
-
-	public void setPaymentDate(LocalDate paymentDate) {
-		this.paymentDate = paymentDate;
-	}
-
 	public PaymentStatus getPaymentStatus() {
 		return paymentStatus;
 	}
@@ -149,12 +141,20 @@ public class TransportDocument implements Serializable {
 		this.addressShipper = addressShipper;
 	}
 
-	public LocalDate getPaymentForecast() {
-		return paymentForecast;
+	public LocalDate getPaymentForecastByScannedDate() {
+		return paymentForecastByScannedDate;
 	}
 
-	public void setPaymentForecast(LocalDate paymentForecast) {
-		this.paymentForecast = paymentForecast;
+	public void setPaymentForecastByScannedDate(LocalDate paymentForecastByScannedDate) {
+		this.paymentForecastByScannedDate = paymentForecastByScannedDate;
+	}
+
+	public LocalDate getPaymentForecastByPaymentApprovalDate() {
+		return paymentForecastByPaymentApprovalDate;
+	}
+
+	public void setPaymentForecastByPaymentApprovalDate(LocalDate paymentForecastByPaymentApprovalDate) {
+		this.paymentForecastByPaymentApprovalDate = paymentForecastByPaymentApprovalDate;
 	}
 
 	public Payment getPayment() {

@@ -6,17 +6,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -41,14 +31,8 @@ public class Invoice implements Serializable {
 	private LocalDate scannedDate;
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate paymentApprovalDate;
-	@JsonFormat(pattern = "dd/MM/yyyy")
-	private LocalDate createdAt;
-	@JsonFormat(pattern = "dd/MM/yyyy")
-	private LocalDate updatedAt;
-
 	
-	@ManyToMany(mappedBy = "invoices")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@ManyToMany(mappedBy = "invoices", fetch = FetchType.EAGER)
 	private Set<TransportDocument> transportDocuments = new HashSet<>();
 	
 	public Invoice() {
@@ -65,7 +49,7 @@ public class Invoice implements Serializable {
 	public Invoice(InvoiceDTO invoiceDTO) {
 		this.id = invoiceDTO.getId();
 		this.number = invoiceDTO.getNumber();
-		this.deliveryStatus = invoiceDTO.getDeliveryStatus();
+		this.deliveryStatus = invoiceDTO.getScannedDate() != null ? DeliveryStatus.DELIVERED : DeliveryStatus.PENDING;
 		this.scannedDate = invoiceDTO.getScannedDate();
 		this.paymentApprovalDate = invoiceDTO.getPaymentApprovalDate();
 	}
@@ -109,22 +93,6 @@ public class Invoice implements Serializable {
 	public void setPaymentApprovalDate(LocalDate paymentApprovalDate) {
 		this.paymentApprovalDate = paymentApprovalDate;
 	}
-
-	public LocalDate getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(LocalDate createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public LocalDate getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(LocalDate updatedAt) {
-		this.updatedAt = updatedAt;
-	}
 	
 	public Set<TransportDocument> getTransportDocuments() {
 		return transportDocuments;
@@ -132,16 +100,6 @@ public class Invoice implements Serializable {
 
 	public void setTransportDocuments(Set<TransportDocument> transportDocuments) {
 		this.transportDocuments = transportDocuments;
-	}
-
-	@PrePersist
-	public void prePersist() {
-		createdAt = LocalDate.now();
-	}
-	
-	@PreUpdate
-	public void preUpdate() {
-		updatedAt = LocalDate.now();
 	}
 
 	@Override

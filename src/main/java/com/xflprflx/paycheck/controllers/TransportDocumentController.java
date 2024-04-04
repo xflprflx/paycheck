@@ -30,6 +30,7 @@ public class TransportDocumentController {
 			transportDocumentService.saveCteWithInvoice(transportDocumentDTOS);
 			return ResponseEntity.ok().body("CT-es salvos com sucesso.");
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Erro ao salvar CT-es: " + e.getMessage());
 		}

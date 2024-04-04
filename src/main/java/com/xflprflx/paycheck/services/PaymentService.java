@@ -39,4 +39,8 @@ public class PaymentService {
 		}
 		return paymentDTOS;
 	}
+
+    public Optional<Payment> findPaymentByNumber(String number) {
+		return paymentRepository.findByNumber(number);
+    }
 }
