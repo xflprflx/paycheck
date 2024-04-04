@@ -61,11 +61,16 @@ public class InvoiceService {
 			invoice.getTransportDocuments().forEach(transportDocumentsToUpdate::add);
 		}
 		for (TransportDocument transportDocument : transportDocumentsToUpdate) {
-			boolean allDelivered = transportDocument.getInvoices().stream()
-					.allMatch(invoice -> invoice.getDeliveryStatus() == DeliveryStatus.DELIVERED);
-			if (allDelivered) {
-				LocalDate newPaymentForecast = paymentForecastCalculatorService.calculateNewPaymentForecast(transportDocument);
-				transportDocument.setPaymentForecastByScannedDate(newPaymentForecast);
+			boolean allScanned = transportDocument.getInvoices().stream().allMatch(inv -> inv.getScannedDate() != null);
+			boolean allApproved = transportDocument.getInvoices().stream().allMatch(inv -> inv.getPaymentApprovalDate() != null);
+
+			if (allScanned || allApproved) {
+				LocalDate newPaymentForecastByScannedDate = allScanned ? paymentForecastCalculatorService.calculateNewPaymentForecastByScannedDate(transportDocument) : transportDocument.getPaymentForecastByScannedDate();
+				LocalDate newPaymentForecastByApprovalDate = allApproved ? paymentForecastCalculatorService.calculateNewPaymentForecastByPaymentApprovalDate(transportDocument) : transportDocument.getPaymentForecastByPaymentApprovalDate();
+
+				transportDocument.setPaymentForecastByScannedDate(newPaymentForecastByScannedDate);
+				transportDocument.setPaymentForecastByPaymentApprovalDate(newPaymentForecastByApprovalDate);
+
 				transportDocumentRepository.save(transportDocument);
 			}
 		}
