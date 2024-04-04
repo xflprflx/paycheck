@@ -1,7 +1,8 @@
-package com.xflprflx.paycheck.domain;
+package com.xflprflx.paycheck.domain.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.xflprflx.paycheck.domain.Payment;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -10,13 +11,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Entity
-@Table(name = "tb_payment")
-public class Payment  implements Serializable {
+public class PaymentDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String number;
     private String serie;
@@ -28,18 +25,18 @@ public class Payment  implements Serializable {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate paymentDate;
 
-    public Payment() {
+    public PaymentDTO() {
     }
 
-    public Payment(Integer id, String number, String serie, String invoiceSG, String myInvoice, String docCompensation, Double amount, String text) {
-        this.id = id;
-        this.number = number;
-        this.serie = serie;
-        this.invoiceSG = invoiceSG;
-        this.myInvoice = myInvoice;
-        this.docCompensation = docCompensation;
-        this.amount = amount;
-        this.text = text;
+    public PaymentDTO(Payment payment) {
+        this.id = payment.getId();
+        this.number = payment.getNumber();
+        this.serie = payment.getSerie();
+        this.invoiceSG = payment.getInvoiceSG();
+        this.myInvoice = payment.getMyInvoice();
+        this.docCompensation = payment.getDocCompensation();
+        this.amount = payment.getAmount();
+        this.text = payment.getText();
     }
 
     public Integer getId() {
@@ -124,7 +121,7 @@ public class Payment  implements Serializable {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
 
-        Payment payment = (Payment) object;
+        PaymentDTO payment = (PaymentDTO) object;
 
         return Objects.equals(id, payment.id);
     }

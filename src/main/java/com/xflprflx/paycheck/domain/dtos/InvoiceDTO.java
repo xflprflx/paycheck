@@ -5,9 +5,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.xflprflx.paycheck.domain.Invoice;
 import com.xflprflx.paycheck.domain.enums.DeliveryStatus;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class InvoiceDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 

@@ -7,20 +7,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -50,21 +37,21 @@ public class TransportDocument implements Serializable {
 	private LocalDate paymentDate;
 	@Enumerated(EnumType.STRING)
 	private PaymentStatus paymentStatus;
-	@JsonFormat(pattern = "dd/MM/yyyy")
-	private LocalDate createdAt;
-	@JsonFormat(pattern = "dd/MM/yyyy")
-	private LocalDate updatedAt;
 	
     @ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "tb_transport_document_invoice",
 		joinColumns = @JoinColumn(name = "transport_document_id"),
 		inverseJoinColumns = @JoinColumn(name = "invoice_id"))
     private Set<Invoice> invoices = new HashSet<>();
-	
+
+	@ManyToOne
+	@JoinColumn(name = "payment_id")
+	private Payment payment;
+
 	public TransportDocument() {
 	}
 
-	public TransportDocument(Integer id, String number, String serie, Double amount, String addressShipper, LocalDate issueDate, LocalDate paymentForecast, LocalDate paymentDate, PaymentStatus paymentStatus) {
+	public TransportDocument(Integer id, String number, String serie, Double amount, String addressShipper, LocalDate issueDate, LocalDate paymentForecast, LocalDate paymentDate, PaymentStatus paymentStatus, Payment payment) {
 		this.id = id;
 		this.number = number;
 		this.serie = serie;
@@ -74,6 +61,7 @@ public class TransportDocument implements Serializable {
 		this.paymentForecast = paymentForecast;
 		this.paymentDate = paymentDate;
 		this.paymentStatus = paymentStatus;
+		this.payment = payment;
 	}
 
 	public TransportDocument(TransportDocumentDTO transportDocumentDTO) {
@@ -144,22 +132,6 @@ public class TransportDocument implements Serializable {
 	public void setPaymentStatus(PaymentStatus paymentStatus) {
 		this.paymentStatus = paymentStatus;
 	}
-
-	public LocalDate getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(LocalDate createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public LocalDate getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(LocalDate updatedAt) {
-		this.updatedAt = updatedAt;
-	}
 	
 	public Set<Invoice> getInvoices() {
 		return invoices;
@@ -185,15 +157,13 @@ public class TransportDocument implements Serializable {
 		this.paymentForecast = paymentForecast;
 	}
 
-	@PrePersist
-    public void prePersist() {
-        createdAt = LocalDate.now();
-    }
+	public Payment getPayment() {
+		return payment;
+	}
 
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDate.now();
-    }
+	public void setPayment(Payment payment) {
+		this.payment = payment;
+	}
 
 	@Override
 	public int hashCode() {
@@ -211,6 +181,4 @@ public class TransportDocument implements Serializable {
 		TransportDocument other = (TransportDocument) obj;
 		return Objects.equals(id, other.id);
 	}
-	
-	
 }

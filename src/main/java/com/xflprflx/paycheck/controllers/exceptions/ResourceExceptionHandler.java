@@ -3,6 +3,7 @@ package com.xflprflx.paycheck.controllers.exceptions;
 import javax.servlet.http.HttpServletRequest;
 
 import com.xflprflx.paycheck.services.exceptions.DataIntegrityViolationException;
+import com.xflprflx.paycheck.services.exceptions.FileException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -33,6 +34,15 @@ public class ResourceExceptionHandler {
 				"Integrity Violation", ex.getMessage(), request.getRequestURI());
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+	}
+
+	@ExceptionHandler(FileException.class)
+	public ResponseEntity<StandardError> objectNotFoundException(FileException ex,
+																 HttpServletRequest request) {
+		StandardError error = new StandardError(System.currentTimeMillis(), HttpStatus.NOT_FOUND.value(),
+				"Unprocessable File", ex.getMessage(), request.getRequestURI());
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

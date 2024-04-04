@@ -1,6 +1,7 @@
 package com.xflprflx.paycheck.domain.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.xflprflx.paycheck.domain.Invoice;
 import com.xflprflx.paycheck.domain.TransportDocument;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
@@ -13,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransportDocumentDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -32,6 +34,7 @@ public class TransportDocumentDTO implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate paymentDate;
 	private PaymentStatus paymentStatus;
+	private PaymentDTO paymentDTO;
 
 	private Set<InvoiceDTO> invoices = new HashSet<>();
 
@@ -133,5 +136,13 @@ public class TransportDocumentDTO implements Serializable {
 
 	public void setPaymentForecast(LocalDate paymentForecast) {
 		this.paymentForecast = paymentForecast;
+	}
+
+	public PaymentDTO getPaymentDTO() {
+		return paymentDTO;
+	}
+
+	public void setPaymentDTO(PaymentDTO paymentDTO) {
+		this.paymentDTO = paymentDTO;
 	}
 }

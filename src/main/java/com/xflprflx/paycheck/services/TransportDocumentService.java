@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 import com.xflprflx.paycheck.domain.Invoice;
+import com.xflprflx.paycheck.domain.Payment;
 import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
 import com.xflprflx.paycheck.repositories.InvoiceRepository;
 import com.xflprflx.paycheck.services.exceptions.DataIntegrityViolationException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,38 +27,6 @@ public class TransportDocumentService {
 
 	@Autowired
 	private InvoiceRepository invoiceRepository;
-
-	public TransportDocument findById(Integer id) {
-		Optional<TransportDocument> obj = transportDocumentRepository.findById(id);
-		return obj.orElseThrow(() -> new ObjectNotFoundException("Documento não encontrado! Id: " + id));
-	}
-
-	public List<TransportDocument> findAll() {
-		return transportDocumentRepository.findAll();
-	}
-
-	public TransportDocument create(TransportDocumentDTO transportDocumentDTO) {
-		transportDocumentDTO.setId(null);
-		validByNumber(transportDocumentDTO);
-		TransportDocument transportDocument = new TransportDocument(transportDocumentDTO);
-		return transportDocumentRepository.save(transportDocument);
-	}
-
-	public TransportDocument update(Integer id, TransportDocumentDTO transportDocumentDTO) {
-		transportDocumentDTO.setId(id);
-		TransportDocument obj = findById(id);
-		validByNumber(transportDocumentDTO);
-		obj = new TransportDocument(transportDocumentDTO);
-		return transportDocumentRepository.save(obj);
-	}
-
-
-	private void validByNumber(TransportDocumentDTO transportDocumentDTO) {
-		Optional<TransportDocument> transportDocument = transportDocumentRepository.findByNumber(transportDocumentDTO.getNumber());
-		if (transportDocument.isPresent() && transportDocument.get().getId() != transportDocumentDTO.getId()) {
-			throw new DataIntegrityViolationException("Documento já cadastrado no sistema");
-		}
-	}
 
 	@Transactional
     public void saveCteWithInvoice(List<TransportDocumentDTO> transportDocumentDTOS) {
@@ -77,19 +47,32 @@ public class TransportDocumentService {
 				}
 			}
 			Optional<TransportDocument> optionalTransportDocument = transportDocumentRepository.findByNumber(transportDocumentDTO.getNumber());
+			var transportDocument = new TransportDocument(transportDocumentDTO);
 			if (optionalTransportDocument.isPresent()) {
 				var oldTransportDocument = optionalTransportDocument.get();
-				var transportDocument = new TransportDocument(transportDocumentDTO);
 				transportDocument.setId(oldTransportDocument.getId());
-				transportDocument = transportDocumentRepository.save(transportDocument);
-				transportDocumentDTO.setId(transportDocument.getId());
-			} else {
-				var transportDocument = new TransportDocument(transportDocumentDTO);
-				transportDocument = transportDocumentRepository.save(transportDocument);
-				transportDocumentDTO.setId(transportDocument.getId());
 			}
-			transportDocuments.add(new TransportDocument(transportDocumentDTO));
+				transportDocument = transportDocumentRepository.save(transportDocument);
+				transportDocumentDTO.setId(transportDocument.getId());
+
+//			transportDocuments.add(new TransportDocument(transportDocumentDTO));
+			//transportDocuments.add(BeanUtils.copyProperties(transportDocumentDTO, transportDocument));
 		}
-		transportDocumentRepository.saveAll(transportDocuments);
+		//transportDocumentRepository.saveAll(transportDocuments);
     }
+
+
+
+	public void updateByPayment(Payment payment) {
+		Optional<TransportDocument> transportDocumentOptional = transportDocumentRepository.findByNumber(payment.getNumber());
+		if (transportDocumentOptional.isPresent()){
+			TransportDocument transportDocument = transportDocumentOptional.get();
+			transportDocument.setPayment(payment);
+			transportDocumentRepository.save(transportDocument);
+		}
+	}
+
+	public List<TransportDocument> findAll() {
+		return transportDocumentRepository.findAll();
+	}
 }

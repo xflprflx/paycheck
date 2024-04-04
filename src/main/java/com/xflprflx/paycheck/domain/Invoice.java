@@ -19,10 +19,12 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
 import com.xflprflx.paycheck.domain.enums.DeliveryStatus;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "tb_invoice")
 public class Invoice implements Serializable {
