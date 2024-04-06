@@ -15,7 +15,7 @@ public class InvoiceDTO implements Serializable {
 
 	private Integer id;
 	private String number;
-	private DeliveryStatus deliveryStatus;
+	private String deliveryStatus;
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate scannedDate;
 	@JsonFormat(pattern = "dd/MM/yyyy")
@@ -27,7 +27,7 @@ public class InvoiceDTO implements Serializable {
 	public InvoiceDTO(Invoice invoice) {
 		this.id = invoice.getId();
 		this.number = invoice.getNumber();
-		this.deliveryStatus = invoice.getDeliveryStatus();
+		this.deliveryStatus = invoice.getDeliveryStatus().getDescription();
 		this.scannedDate = invoice.getScannedDate();
 		this.paymentApprovalDate = invoice.getPaymentApprovalDate();
 	}
@@ -48,12 +48,12 @@ public class InvoiceDTO implements Serializable {
 		this.number = number;
 	}
 
-	public DeliveryStatus getDeliveryStatus() {
+	public String getDeliveryStatus() {
 		return deliveryStatus;
 	}
 
 	public void setDeliveryStatus(DeliveryStatus deliveryStatus) {
-		this.deliveryStatus = deliveryStatus;
+		this.deliveryStatus = deliveryStatus.getDescription();
 	}
 
 	public LocalDate getScannedDate() {

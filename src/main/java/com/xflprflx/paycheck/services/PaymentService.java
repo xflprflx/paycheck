@@ -26,6 +26,7 @@ public class PaymentService {
 	@Autowired
 	private TransportDocumentService transportDocumentService;
 
+	@Transactional
 	public List<PaymentDTO> savePayments(List<Payment> payments) {
 		List<PaymentDTO> paymentDTOS = new ArrayList<>();
 		for (Payment payment : payments) {

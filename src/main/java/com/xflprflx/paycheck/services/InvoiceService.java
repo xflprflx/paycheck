@@ -4,8 +4,10 @@ import com.xflprflx.paycheck.domain.Invoice;
 import com.xflprflx.paycheck.domain.TransportDocument;
 import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
 import com.xflprflx.paycheck.domain.enums.DeliveryStatus;
+import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 import com.xflprflx.paycheck.repositories.InvoiceRepository;
 import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
+import com.xflprflx.paycheck.services.exceptions.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,8 +73,17 @@ public class InvoiceService {
 				transportDocument.setPaymentForecastByScannedDate(newPaymentForecastByScannedDate);
 				transportDocument.setPaymentForecastByPaymentApprovalDate(newPaymentForecastByApprovalDate);
 
-				transportDocumentRepository.save(transportDocument);
+				//transportDocumentRepository.save(transportDocument);
+			}
+			if (transportDocument.getPaymentStatus() != null){
+				if (!transportDocument.getPaymentStatus().equals(PaymentStatus.DEBATE_PAYMENT)) {
+					transportDocument.setPaymentStatus(PaymentStatus.updatePaymentStatus(transportDocument));
+				}
+			} else {
+				transportDocument.setPaymentStatus(PaymentStatus.updatePaymentStatus(transportDocument));
 			}
 		}
+		transportDocumentRepository.saveAll(transportDocumentsToUpdate);
 	}
+
 }

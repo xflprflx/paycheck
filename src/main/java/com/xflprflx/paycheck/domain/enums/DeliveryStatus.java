@@ -8,6 +8,8 @@ public enum DeliveryStatus {
 	private String 	description;
 	
 	DeliveryStatus(Integer code, String description) {
+		this.code = code;
+		this.description = description;
 	}
 
 	public Integer getCode() {

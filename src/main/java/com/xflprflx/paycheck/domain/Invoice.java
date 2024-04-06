@@ -26,13 +26,13 @@ public class Invoice implements Serializable {
 	@Column(unique = true)
 	private String number;
 	@Enumerated(EnumType.STRING)
-	private DeliveryStatus deliveryStatus;
+	private DeliveryStatus deliveryStatus = DeliveryStatus.PENDING;
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate scannedDate;
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate paymentApprovalDate;
-	
-	@ManyToMany(mappedBy = "invoices", fetch = FetchType.EAGER)
+
+	@ManyToMany(mappedBy = "invoices",fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
 	private Set<TransportDocument> transportDocuments = new HashSet<>();
 	
 	public Invoice() {
@@ -117,5 +117,13 @@ public class Invoice implements Serializable {
 			return false;
 		Invoice other = (Invoice) obj;
 		return Objects.equals(id, other.id);
+	}
+
+	@PreRemove
+	private void removeTransportDocumentsFromInvoice() {
+		for (TransportDocument transportDocument : transportDocuments) {
+			transportDocument.getInvoices().remove(this);
+		}
+		transportDocuments.clear();
 	}
 }

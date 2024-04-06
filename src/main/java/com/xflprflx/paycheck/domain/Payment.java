@@ -2,12 +2,15 @@ package com.xflprflx.paycheck.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.Set;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
@@ -27,6 +30,10 @@ public class Payment  implements Serializable {
     private String text;
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate paymentDate;
+
+    @OneToMany(mappedBy = "payment")
+    @Fetch(FetchMode.SUBSELECT)
+    private Set<TransportDocument> transportDocument;
 
     public Payment() {
     }

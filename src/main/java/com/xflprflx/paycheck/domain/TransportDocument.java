@@ -3,9 +3,7 @@ package com.xflprflx.paycheck.domain;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.*;
 
@@ -13,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -37,14 +37,17 @@ public class TransportDocument implements Serializable {
 	private LocalDate paymentForecastByPaymentApprovalDate;
 	@Enumerated(EnumType.STRING)
 	private PaymentStatus paymentStatus;
-	
-    @ManyToMany(fetch = FetchType.EAGER)
+	@Column(columnDefinition = "TEXT")
+	private String reasonReduction = "";
+
+	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@Fetch(FetchMode.SUBSELECT)
 	@JoinTable(name = "tb_transport_document_invoice",
 		joinColumns = @JoinColumn(name = "transport_document_id"),
 		inverseJoinColumns = @JoinColumn(name = "invoice_id"))
     private Set<Invoice> invoices = new HashSet<>();
 
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.REMOVE})
 	@JoinColumn(name = "payment_id")
 	private Payment payment;
 
@@ -73,8 +76,7 @@ public class TransportDocument implements Serializable {
 		this.issueDate = transportDocumentDTO.getIssueDate();
 		this.paymentForecastByScannedDate = transportDocumentDTO.getPaymentForecastByScannedDate();
 		this.paymentForecastByPaymentApprovalDate = transportDocumentDTO.getPaymentForecastByPaymentApprovalDate();
-		this.paymentStatus = transportDocumentDTO.getPaymentStatus();
-//		transportDocumentDTO.getInvoices().forEach(invoiceDto -> this.invoices.add(new Invoice(invoiceDto)));
+		this.paymentStatus = transportDocumentDTO.getPaymentStatus() != null ? PaymentStatus.toEnum(transportDocumentDTO.getPaymentStatus()) : PaymentStatus.updatePaymentStatus(this);
 	}
 	
 	public Integer getId() {
@@ -165,6 +167,14 @@ public class TransportDocument implements Serializable {
 		this.payment = payment;
 	}
 
+	public String getReasonReduction() {
+		return reasonReduction;
+	}
+
+	public void setReasonReduction(String reasonReduction) {
+		this.reasonReduction = reasonReduction;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
@@ -181,4 +191,67 @@ public class TransportDocument implements Serializable {
 		TransportDocument other = (TransportDocument) obj;
 		return Objects.equals(id, other.id);
 	}
+
+	public boolean isPaidOnTime() {
+		if (this.payment != null) {
+			if (this.paymentForecastByScannedDate != null) {
+				return this.paymentForecastByScannedDate.isAfter(this.payment.getPaymentDate()) ||
+						this.paymentForecastByScannedDate.equals(this.payment.getPaymentDate());
+			}
+		}
+		return false;
+	}
+
+	public boolean isPaidLate() {
+		if (this.payment != null) {
+			if (this.paymentForecastByScannedDate != null) {
+				return this.paymentForecastByScannedDate.isBefore(this.payment.getPaymentDate());
+			}
+		}
+		return false;
+	}
+
+	public boolean isPendingOnTime() {
+		if (this.payment == null) {
+			if (this.paymentForecastByScannedDate != null) {
+				return this.paymentForecastByScannedDate.isAfter(LocalDate.now());
+			}
+			return false;
+		}
+		return false;
+	}
+
+	public boolean isPendingLate() {
+		if (this.payment == null) {
+			if (this.paymentForecastByScannedDate != null) {
+				return this.paymentForecastByScannedDate.isBefore(LocalDate.now());
+			}
+			return false;
+		}
+		return false;
+	}
+
+	public boolean isPendingApproval() {
+		if(this.isAllScanned(this) && !this.isAllApproved(this)){
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isScanPending() {
+		if (!this.isAllScanned(this)) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isAllScanned(TransportDocument transportDocument) {
+		return transportDocument.getInvoices().stream().allMatch(inv -> inv.getScannedDate() != null);
+	}
+
+	private boolean isAllApproved(TransportDocument transportDocument) {
+		return transportDocument.getInvoices().stream().allMatch(inv -> inv.getPaymentApprovalDate() != null);
+	}
+
+
 }

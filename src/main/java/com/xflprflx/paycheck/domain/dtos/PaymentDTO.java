@@ -35,6 +35,7 @@ public class PaymentDTO implements Serializable {
         this.invoiceSG = payment.getInvoiceSG();
         this.myInvoice = payment.getMyInvoice();
         this.docCompensation = payment.getDocCompensation();
+        this.paymentDate = payment.getPaymentDate();
         this.amount = payment.getAmount();
         this.text = payment.getText();
     }

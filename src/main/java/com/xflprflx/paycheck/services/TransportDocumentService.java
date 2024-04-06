@@ -1,24 +1,31 @@
 package com.xflprflx.paycheck.services;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.xflprflx.paycheck.domain.Invoice;
 import com.xflprflx.paycheck.domain.Payment;
 import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
 import com.xflprflx.paycheck.domain.dtos.PaymentDTO;
+import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 import com.xflprflx.paycheck.repositories.InvoiceRepository;
-import com.xflprflx.paycheck.services.exceptions.DataIntegrityViolationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.xflprflx.paycheck.domain.TransportDocument;
 import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
 import com.xflprflx.paycheck.services.exceptions.ObjectNotFoundException;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityNotFoundException;
 
 @Service
 public class TransportDocumentService {
@@ -32,9 +39,18 @@ public class TransportDocumentService {
 	@Autowired
 	private PaymentService paymentService;
 
+	@Autowired
+	private PaymentForecastCalculatorService paymentForecastCalculatorService;
+
 	@Transactional(readOnly = true)
 	public Optional<TransportDocument> findTransportDocumentByNumber(String numberTransportDocument) {
 		return transportDocumentRepository.findByNumber(numberTransportDocument);
+	}
+
+	@Transactional(readOnly = true)
+	public List<TransportDocumentDTO> findAllTransportDocuments() {
+		List<TransportDocument> transportDocuments = this.transportDocumentRepository.findAll();
+		return transportDocuments.stream().map(x -> new TransportDocumentDTO(x, x.getInvoices())).collect(Collectors.toList());
 	}
 
 	@Transactional
@@ -43,7 +59,15 @@ public class TransportDocumentService {
 		for (TransportDocumentDTO transportDocumentDTO : transportDocumentDTOS) {
 			TransportDocument transportDocument = createOrUpdateTransportDocument(transportDocumentDTO);
 			processInvoices(transportDocumentDTO, transportDocument);
+			transportDocument = updateTransportDocumentPaymentForecast(transportDocument);
 			associatePayment(transportDocumentDTO, transportDocument);
+			if (transportDocument.getPaymentStatus() != null){
+				if (!transportDocument.getPaymentStatus().equals(PaymentStatus.DEBATE_PAYMENT)) {
+					transportDocument.setPaymentStatus(PaymentStatus.updatePaymentStatus(transportDocument));
+				}
+			} else {
+				transportDocument.setPaymentStatus(PaymentStatus.updatePaymentStatus(transportDocument));
+			}
 			transportDocuments.add(transportDocument);
 		}
 		transportDocumentRepository.saveAll(transportDocuments);
@@ -52,7 +76,11 @@ public class TransportDocumentService {
 	private TransportDocument createOrUpdateTransportDocument(TransportDocumentDTO transportDocumentDTO) {
 		TransportDocument transportDocument = new TransportDocument(transportDocumentDTO);
 		findTransportDocumentByNumber(transportDocumentDTO.getNumber())
-				.ifPresent(existingTransportDocument -> transportDocument.setId(existingTransportDocument.getId()));
+				.ifPresent(existingTransportDocument -> {
+					transportDocument.setId(existingTransportDocument.getId());
+					transportDocument.setPaymentStatus(existingTransportDocument.getPaymentStatus());
+					transportDocument.setReasonReduction(existingTransportDocument.getReasonReduction());
+				});
 		return transportDocument;
 	}
 
@@ -75,7 +103,76 @@ public class TransportDocumentService {
 		if (transportDocumentOptional.isPresent()){
 			TransportDocument transportDocument = transportDocumentOptional.get();
 			transportDocument.setPayment(payment);
+			transportDocument.setPaymentStatus(PaymentStatus.updatePaymentStatus(transportDocument));
 			transportDocumentRepository.save(transportDocument);
 		}
 	}
+
+	public TransportDocument updateTransportDocumentPaymentForecast(TransportDocument transportDocument) {
+		boolean allScanned = isAllScanned(transportDocument);
+		boolean allApproved = isAllApproved(transportDocument);
+		if (allScanned || allApproved) {
+			LocalDate newPaymentForecastByScannedDate = allScanned ? paymentForecastCalculatorService.calculateNewPaymentForecastByScannedDate(transportDocument) : transportDocument.getPaymentForecastByScannedDate();
+			LocalDate newPaymentForecastByApprovalDate = allApproved ? paymentForecastCalculatorService.calculateNewPaymentForecastByPaymentApprovalDate(transportDocument) : transportDocument.getPaymentForecastByPaymentApprovalDate();
+			transportDocument.setPaymentForecastByScannedDate(newPaymentForecastByScannedDate);
+			transportDocument.setPaymentForecastByPaymentApprovalDate(newPaymentForecastByApprovalDate);
+		}
+		return transportDocument;
+	}
+
+	private boolean isAllScanned(TransportDocument transportDocument) {
+		return transportDocument.getInvoices().stream().allMatch(inv -> inv.getScannedDate() != null);
+	}
+
+	private boolean isAllApproved(TransportDocument transportDocument) {
+		return transportDocument.getInvoices().stream().allMatch(inv -> inv.getPaymentApprovalDate() != null);
+	}
+
+	@Transactional(readOnly = true)
+	public TransportDocumentDTO findById(Integer id) {
+		Optional<TransportDocument> optionalTransportDocument = transportDocumentRepository.findById(id);
+		TransportDocument transportDocument = optionalTransportDocument.orElseThrow(() -> new ObjectNotFoundException("Documento não encontrado."));
+		return new TransportDocumentDTO(transportDocument, transportDocument.getInvoices());
+	}
+
+	@Transactional
+	public TransportDocumentDTO blockPayment(Integer id, String reasonReduction) {
+		try {
+			TransportDocument transportDocument = transportDocumentRepository.getOne(id);
+			transportDocument.setId(id);
+			transportDocument.setReasonReduction(reasonReduction);
+			transportDocument.setPaymentStatus(PaymentStatus.DEBATE_PAYMENT);
+			transportDocument = transportDocumentRepository.save(transportDocument);
+			return new TransportDocumentDTO(transportDocument);
+		}catch (EntityNotFoundException e) {
+			throw new ObjectNotFoundException("Documento não encontrado");
+		}
+	}
+
+	@Transactional
+	public TransportDocumentDTO unlockPayment(Integer id, Integer paymentStatus) {
+		try {
+			TransportDocument transportDocument = transportDocumentRepository.getOne(id);
+			transportDocument.setId(id);
+			transportDocument.setReasonReduction("");
+			transportDocument.setPaymentStatus(PaymentStatus.toEnum(paymentStatus));
+			transportDocument = transportDocumentRepository.save(transportDocument);
+			return new TransportDocumentDTO(transportDocument);
+		}catch (EntityNotFoundException e) {
+			throw new ObjectNotFoundException("Documento não encontrado");
+		}
+	}
+
+	@Transactional(propagation = Propagation.SUPPORTS)
+    public void deletePaymentCascadeAll(Integer id) {
+		if (transportDocumentRepository.existsById(id)) {
+			try {
+				transportDocumentRepository.deleteById(id);
+			} catch (org.springframework.dao.DataIntegrityViolationException e) {
+				throw new com.xflprflx.paycheck.services.exceptions.DataIntegrityViolationException("Falha de integridade referencial");
+			} catch (EntityNotFoundException e) {
+				throw new ObjectNotFoundException("Documento não encontrado");
+			}
+		}
+    }
 }

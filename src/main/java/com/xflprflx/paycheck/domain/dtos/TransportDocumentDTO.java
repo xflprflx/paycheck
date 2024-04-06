@@ -37,7 +37,9 @@ public class TransportDocumentDTO implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate paymentForecastByPaymentApprovalDate;
 	@Enumerated(EnumType.STRING)
-	private PaymentStatus paymentStatus;
+	private String paymentStatus;
+	private String reasonReduction;
+
 	private PaymentDTO paymentDTO;
 
 	private Set<InvoiceDTO> invoices = new HashSet<>();
@@ -54,10 +56,14 @@ public class TransportDocumentDTO implements Serializable {
 		this.issueDate = transportDocument.getIssueDate();
 		this.paymentForecastByScannedDate = transportDocument.getPaymentForecastByScannedDate();
 		this.paymentForecastByPaymentApprovalDate = transportDocument.getPaymentForecastByPaymentApprovalDate();
-		this.paymentStatus = transportDocument.getPaymentStatus();
-		this.paymentDTO = new PaymentDTO(transportDocument.getPayment());
+		this.paymentStatus = transportDocument.getPaymentStatus() != null ? transportDocument.getPaymentStatus().getDescription() : "";
+		this.reasonReduction = transportDocument.getReasonReduction();
+		if (transportDocument.getPayment()!=null){
+			this.paymentDTO = new PaymentDTO(transportDocument.getPayment());
+		}
 	}
-	
+
+
 	public TransportDocumentDTO(TransportDocument transportDocument, Set<Invoice> invoices) {
 		this(transportDocument);
 		invoices.forEach(invoice -> this.invoices.add(new InvoiceDTO(invoice)));
@@ -108,12 +114,12 @@ public class TransportDocumentDTO implements Serializable {
 		this.issueDate = LocalDate.parse(issueDateStr, formatter);
 	}
 
-	public PaymentStatus getPaymentStatus() {
+	public String getPaymentStatus() {
 		return paymentStatus;
 	}
 
 	public void setPaymentStatus(PaymentStatus paymentStatus) {
-		this.paymentStatus = paymentStatus;
+		this.paymentStatus = paymentStatus.getDescription();
 	}
 
 	public Set<InvoiceDTO> getInvoices() {
@@ -152,5 +158,15 @@ public class TransportDocumentDTO implements Serializable {
 		this.paymentDTO = paymentDTO;
 	}
 
+	public void setPaymentStatus(String paymentStatus) {
+		this.paymentStatus = paymentStatus;
+	}
 
+	public String getReasonReduction() {
+		return reasonReduction;
+	}
+
+	public void setReasonReduction(String reasonReduction) {
+		this.reasonReduction = reasonReduction;
+	}
 }
