@@ -32,7 +32,7 @@ public class Invoice implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate paymentApprovalDate;
 
-	@ManyToMany(mappedBy = "invoices",fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+	@ManyToMany(mappedBy = "invoices",fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	private Set<TransportDocument> transportDocuments = new HashSet<>();
 	
 	public Invoice() {
@@ -119,11 +119,11 @@ public class Invoice implements Serializable {
 		return Objects.equals(id, other.id);
 	}
 
-	@PreRemove
+/*	@PreRemove
 	private void removeTransportDocumentsFromInvoice() {
 		for (TransportDocument transportDocument : transportDocuments) {
 			transportDocument.getInvoices().remove(this);
 		}
 		transportDocuments.clear();
-	}
+	}*/
 }

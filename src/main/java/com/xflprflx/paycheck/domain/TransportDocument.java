@@ -40,7 +40,7 @@ public class TransportDocument implements Serializable {
 	@Column(columnDefinition = "TEXT")
 	private String reasonReduction = "";
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	@Fetch(FetchMode.SUBSELECT)
 	@JoinTable(name = "tb_transport_document_invoice",
 		joinColumns = @JoinColumn(name = "transport_document_id"),

@@ -15,6 +15,8 @@ import com.xflprflx.paycheck.repositories.InvoiceRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,7 @@ import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
 import com.xflprflx.paycheck.services.exceptions.ObjectNotFoundException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -175,4 +178,47 @@ public class TransportDocumentService {
 			}
 		}
     }
+
+	@Transactional
+	public List<TransportDocumentDTO> findAllFiltered(
+			LocalDate issueStart, LocalDate issueEnd, LocalDate scannedStart, LocalDate scannedEnd, LocalDate forecastScStart, LocalDate forecastScEnd,
+			LocalDate forecastApprStart, LocalDate forecastApprEnd, LocalDate approvalStart, LocalDate approvalEnd,
+			LocalDate paymentStart, LocalDate paymentEnd, Integer paymentStatus) {
+
+		Specification<TransportDocument> spec = Specification.where(null);
+		if (issueStart != null && issueEnd != null) {
+			spec = spec.and((root, query, builder) -> builder.between(root.get("issueDate"), issueStart, issueEnd));
+		}
+		if (scannedStart != null && scannedEnd != null) {
+			spec = spec.and((root, query, builder) -> {
+				query.distinct(true);
+				return builder.between(root.join("invoices").get("scannedDate"), scannedStart, scannedEnd);
+			});
+		}
+		if (forecastScStart != null && forecastScStart != null) {
+			spec = spec.and((root, query, builder) -> builder.between(root.get("paymentForecastByScannedDate"), forecastScStart, forecastScEnd));
+		}
+		if (forecastApprStart != null && forecastApprEnd != null) {
+			spec = spec.and((root, query, builder) -> builder.between(root.get("paymentForecastByPaymentApprovalDate"), forecastApprStart, forecastApprEnd));
+		}
+		if (approvalStart != null && approvalEnd != null) {
+			spec = spec.and((root, query, builder) -> {
+				query.distinct(true);
+				return builder.between(root.join("invoices").get("paymentApprovalDate"), approvalStart, approvalEnd);
+			});
+		}
+		if (paymentStart != null && paymentEnd != null) {
+			spec = spec.and((root, query, builder) -> {
+				query.distinct(true);
+				return builder.between(root.join("payment").get("paymentDate"), paymentStart, paymentEnd);
+			});
+		}
+		if(paymentStatus != null) {
+			spec = spec.and((root, query, builder) -> builder.equal(root.get("paymentStatus"), PaymentStatus.toEnum(paymentStatus)));
+		}
+
+		List<TransportDocument>  transportDocuments = transportDocumentRepository.findAll(spec);
+		List<TransportDocumentDTO> transportDocumentDTOS = transportDocuments.stream().map(x -> new TransportDocumentDTO(x, x.getInvoices())).collect(Collectors.toList());
+		return transportDocumentDTOS;
+	}
 }

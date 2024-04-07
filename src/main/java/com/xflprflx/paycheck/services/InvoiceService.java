@@ -86,4 +86,9 @@ public class InvoiceService {
 		transportDocumentRepository.saveAll(transportDocumentsToUpdate);
 	}
 
+	@Transactional
+	public void delete(Integer id) {
+		invoiceRepository.deleteById(id);
+	}
+
 }

@@ -3,11 +3,13 @@ package com.xflprflx.paycheck.controllers;
 import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 import com.xflprflx.paycheck.services.TransportDocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -52,6 +54,32 @@ public class TransportDocumentController {
 	public ResponseEntity<String> deletePaymentCascadeAll(@PathVariable("id") Integer id) {
 		transportDocumentService.deletePaymentCascadeAll(id);
 		return ResponseEntity.ok().body("requisição recebida");
+	}
+
+	@GetMapping(value = "/filtered")
+	public ResponseEntity<List<TransportDocumentDTO>> findAllFiltered(
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate issueStart,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate  issueEnd,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate scannedStart,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate  scannedEnd,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate forecastScStart,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate  forecastScEnd,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate forecastApprStart,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate forecastApprEnd,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate approvalStart,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate approvalEnd,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentStart,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentEnd,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Integer paymentStatus) {
+
+		System.out.println(issueStart + " " + issueEnd);
+		List<TransportDocumentDTO> transportDocumentDTOS =
+				transportDocumentService.findAllFiltered(issueStart, issueEnd,
+						scannedStart, scannedEnd, forecastScStart, forecastScEnd,
+						forecastApprStart, forecastApprEnd, approvalStart, approvalEnd,
+						paymentStart, paymentEnd, paymentStatus);
+		System.out.println(transportDocumentDTOS);
+		return ResponseEntity.ok().body(transportDocumentDTOS);
 	}
 
 }
