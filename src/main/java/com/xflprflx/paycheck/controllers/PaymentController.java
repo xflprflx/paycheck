@@ -32,6 +32,12 @@ public class PaymentController {
         paymentService.savePayments(payments);
         return ResponseEntity.ok().body("Pagamentos salvos com sucesso.");
     }
+
+    @GetMapping
+    public ResponseEntity<List<PaymentDTO>> findAll() {
+        List<PaymentDTO> paymentDTOS = paymentService.findAll();
+        return ResponseEntity.ok().body(paymentDTOS);
+    }
 }
 
 

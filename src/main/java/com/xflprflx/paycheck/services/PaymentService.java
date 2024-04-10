@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PaymentService {
@@ -44,4 +45,10 @@ public class PaymentService {
     public Optional<Payment> findPaymentByNumber(String number) {
 		return paymentRepository.findByNumber(number);
     }
+
+	@Transactional
+    public List<PaymentDTO> findAll() {
+		List<Payment> payments = paymentRepository.findAll();
+    	return payments.stream().map(x -> new PaymentDTO(x)).collect(Collectors.toList());
+	}
 }
