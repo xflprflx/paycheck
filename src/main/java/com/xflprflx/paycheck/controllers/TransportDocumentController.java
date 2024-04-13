@@ -32,7 +32,6 @@ public class TransportDocumentController {
 			transportDocumentService.saveCteWithInvoice(transportDocumentDTOS);
 			return ResponseEntity.ok().body("CT-es salvos com sucesso.");
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Erro ao salvar CT-es: " + e.getMessage());
 		}
@@ -71,14 +70,11 @@ public class TransportDocumentController {
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentStart,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentEnd,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Integer paymentStatus) {
-
-		System.out.println(issueStart + " " + issueEnd);
 		List<TransportDocumentDTO> transportDocumentDTOS =
 				transportDocumentService.findAllFiltered(issueStart, issueEnd,
 						scannedStart, scannedEnd, forecastScStart, forecastScEnd,
 						forecastApprStart, forecastApprEnd, approvalStart, approvalEnd,
 						paymentStart, paymentEnd, paymentStatus);
-		System.out.println(transportDocumentDTOS);
 		return ResponseEntity.ok().body(transportDocumentDTOS);
 	}
 

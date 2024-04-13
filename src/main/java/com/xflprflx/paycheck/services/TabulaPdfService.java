@@ -45,16 +45,7 @@ public class TabulaPdfService {
 
                         var payment = cellsToPayment(cells, date);
                         payments.add(payment);
-                        // print all column-cells of the row plus linefeed
-/*                        for (RectangularTextContainer content : cells) {
-                            // Note: Cell.getText() uses \r to concat text chunks
-                            String text = content.getText().replace("\r", " ");
-                            System.out.println("------------");
-                            System.out.println(text);
-                            System.out.println("------------");
-                            //System.out.print(text + "|");
-                        }
-                        System.out.println();*/
+
                     }
                 }
 
@@ -78,7 +69,6 @@ public class TabulaPdfService {
         payment.setAmount(Double.valueOf(cells.get(4).getText().toString().replaceAll("\\.", "").replace(",", ".")));
         payment.setText(cells.get(5).getText().toString());
         payment.setPaymentDate(date);
-        System.out.println(payment);
         return payment;
     }
 }

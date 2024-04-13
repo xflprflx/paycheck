@@ -1,7 +1,9 @@
 package com.xflprflx.paycheck.services;
 
 import com.xflprflx.paycheck.domain.Invoice;
+import com.xflprflx.paycheck.domain.Parameters;
 import com.xflprflx.paycheck.domain.TransportDocument;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -10,13 +12,17 @@ import java.time.LocalDate;
 @Service
 public class PaymentForecastCalculatorService {
 
+    @Autowired
+    private ParametersService parametersService;
+
     public LocalDate calculateNewPaymentForecastByScannedDate(TransportDocument transportDocument) {
+        Parameters parameters = parametersService.getParams();
         LocalDate latestScannedDate = transportDocument.getInvoices().stream()
                 .map(Invoice::getScannedDate)
                 .max(LocalDate::compareTo)
                 .orElse(LocalDate.now());
 
-        LocalDate paymentForecastDate = latestScannedDate.plusDays(28);
+        LocalDate paymentForecastDate = latestScannedDate.plusDays(parameters.getPaymentTerms());
 
         if (isFirstWorkingDayOfMonth(paymentForecastDate)) {
             return paymentForecastDate;
@@ -31,12 +37,13 @@ public class PaymentForecastCalculatorService {
     }
 
     public LocalDate calculateNewPaymentForecastByPaymentApprovalDate(TransportDocument transportDocument) {
+        Parameters parameters = parametersService.getParams();
         LocalDate latestApprovalDate = transportDocument.getInvoices().stream()
                 .map(Invoice::getPaymentApprovalDate)
                 .max(LocalDate::compareTo)
                 .orElse(LocalDate.now());
 
-        LocalDate paymentForecastDate = latestApprovalDate.plusDays(28);
+        LocalDate paymentForecastDate = latestApprovalDate.plusDays(parameters.getPaymentTerms());
 
         if (isFirstWorkingDayOfMonth(paymentForecastDate)) {
             return paymentForecastDate;

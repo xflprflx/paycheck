@@ -100,7 +100,6 @@ public class TransportDocumentService {
 				.ifPresent(transportDocument::setPayment);
 	}
 
-	//todo verificar
 	public void updateByPayment(Payment payment) {
 		Optional<TransportDocument> transportDocumentOptional = transportDocumentRepository.findByNumber(payment.getNumber());
 		if (transportDocumentOptional.isPresent()){
