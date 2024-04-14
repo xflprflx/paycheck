@@ -12,6 +12,7 @@ import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
 import com.xflprflx.paycheck.domain.dtos.PaymentDTO;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 import com.xflprflx.paycheck.repositories.InvoiceRepository;
+import org.bouncycastle.crypto.agreement.srp.SRP6Client;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -46,8 +47,8 @@ public class TransportDocumentService {
 	private PaymentForecastCalculatorService paymentForecastCalculatorService;
 
 	@Transactional(readOnly = true)
-	public Optional<TransportDocument> findTransportDocumentByNumber(String numberTransportDocument) {
-		return transportDocumentRepository.findByNumber(numberTransportDocument);
+	public Optional<TransportDocument> findTransportDocumentByNumberAndSerie(String numberTransportDocument, String serie) {
+		return transportDocumentRepository.findByNumberAndSerie(numberTransportDocument, serie);
 	}
 
 	@Transactional(readOnly = true)
@@ -78,7 +79,7 @@ public class TransportDocumentService {
 
 	private TransportDocument createOrUpdateTransportDocument(TransportDocumentDTO transportDocumentDTO) {
 		TransportDocument transportDocument = new TransportDocument(transportDocumentDTO);
-		findTransportDocumentByNumber(transportDocumentDTO.getNumber())
+		findTransportDocumentByNumberAndSerie(transportDocumentDTO.getNumber(), transportDocumentDTO.getSerie())
 				.ifPresent(existingTransportDocument -> {
 					transportDocument.setId(existingTransportDocument.getId());
 					transportDocument.setPaymentStatus(existingTransportDocument.getPaymentStatus());
@@ -101,7 +102,7 @@ public class TransportDocumentService {
 	}
 
 	public void updateByPayment(Payment payment) {
-		Optional<TransportDocument> transportDocumentOptional = transportDocumentRepository.findByNumber(payment.getNumber());
+		Optional<TransportDocument> transportDocumentOptional = transportDocumentRepository.findByNumberAndSerie(payment.getNumber(), payment.getSerie());
 		if (transportDocumentOptional.isPresent()){
 			TransportDocument transportDocument = transportDocumentOptional.get();
 			transportDocument.setPayment(payment);

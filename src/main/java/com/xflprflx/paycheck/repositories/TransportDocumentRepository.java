@@ -9,5 +9,5 @@ import java.util.Optional;
 
 public interface TransportDocumentRepository extends JpaRepository<TransportDocument, Integer>, JpaSpecificationExecutor<TransportDocument> {
 
-    Optional<TransportDocument> findByNumber(String integer);
+    Optional<TransportDocument> findByNumberAndSerie(String integer, String serie);
 }

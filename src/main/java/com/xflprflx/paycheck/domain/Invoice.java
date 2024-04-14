@@ -23,7 +23,6 @@ public class Invoice implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	@Column(unique = true)
 	private String number;
 	@Enumerated(EnumType.STRING)
 	private DeliveryStatus deliveryStatus = DeliveryStatus.PENDING;
