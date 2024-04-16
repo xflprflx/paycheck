@@ -36,7 +36,7 @@ public class TransportDocument implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	private LocalDate paymentForecastByPaymentApprovalDate;
 	@Enumerated(EnumType.STRING)
-	private PaymentStatus paymentStatus;
+	private PaymentStatus paymentStatus = PaymentStatus.PENDING_ON_TIME;
 	@Column(columnDefinition = "TEXT")
 	private String reasonReduction = "";
 
@@ -198,6 +198,7 @@ public class TransportDocument implements Serializable {
 				return this.paymentForecastByScannedDate.isAfter(this.payment.getPaymentDate()) ||
 						this.paymentForecastByScannedDate.equals(this.payment.getPaymentDate());
 			}
+			return true;
 		}
 		return false;
 	}
@@ -210,6 +211,7 @@ public class TransportDocument implements Serializable {
 		}
 		return false;
 	}
+
 
 	public boolean isPendingOnTime() {
 		if (this.payment == null) {
@@ -246,10 +248,16 @@ public class TransportDocument implements Serializable {
 	}
 
 	private boolean isAllScanned(TransportDocument transportDocument) {
+		if (transportDocument.getInvoices().isEmpty()){
+			return false;
+		}
 		return transportDocument.getInvoices().stream().allMatch(inv -> inv.getScannedDate() != null);
 	}
 
 	private boolean isAllApproved(TransportDocument transportDocument) {
+		if (transportDocument.getInvoices().isEmpty()){
+			return false;
+		}
 		return transportDocument.getInvoices().stream().allMatch(inv -> inv.getPaymentApprovalDate() != null);
 	}
 

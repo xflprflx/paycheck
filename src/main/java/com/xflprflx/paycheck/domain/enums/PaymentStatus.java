@@ -53,16 +53,16 @@ public enum PaymentStatus {
 	}
 
 	public static PaymentStatus updatePaymentStatus(TransportDocument transportDocument){
+		if (transportDocument.isPaidLate())
+			return PAID_LATE;
+		if (transportDocument.isPaidOnTime())
+			return PAID_ON_TIME;
 		if (transportDocument.isScanPending())
 			return SCAN_PENDING;
 		if (transportDocument.isPendingApproval())
 			return PENDING_APPROVAL;
 		if (transportDocument.isPendingApproval())
 			return PENDING_APPROVAL;
-		if (transportDocument.isPaidOnTime())
-			return PAID_ON_TIME;
-		if (transportDocument.isPaidLate())
-			return PAID_LATE;
 		if(transportDocument.isPendingOnTime())
 			return PENDING_ON_TIME;
 		if (transportDocument.isPendingLate())

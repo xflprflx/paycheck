@@ -47,8 +47,8 @@ public class TransportDocumentService {
 	private PaymentForecastCalculatorService paymentForecastCalculatorService;
 
 	@Transactional(readOnly = true)
-	public Optional<TransportDocument> findTransportDocumentByNumberAndSerie(String numberTransportDocument, String serie) {
-		return transportDocumentRepository.findByNumberAndSerie(numberTransportDocument, serie);
+	public Optional<TransportDocument> findTransportDocumentByNumberAndSerieAndIssueDate(String numberTransportDocument, String serie, LocalDate issueDate) {
+		return transportDocumentRepository.findByNumberAndSerieAndIssueDate(numberTransportDocument, serie, issueDate);
 	}
 
 	@Transactional(readOnly = true)
@@ -65,13 +65,10 @@ public class TransportDocumentService {
 			processInvoices(transportDocumentDTO, transportDocument);
 			transportDocument = updateTransportDocumentPaymentForecast(transportDocument);
 			associatePayment(transportDocumentDTO, transportDocument);
-			if (transportDocument.getPaymentStatus() != null){
-				if (!transportDocument.getPaymentStatus().equals(PaymentStatus.DEBATE_PAYMENT)) {
-					transportDocument.setPaymentStatus(PaymentStatus.updatePaymentStatus(transportDocument));
-				}
-			} else {
+			if (!transportDocument.getPaymentStatus().equals(PaymentStatus.DEBATE_PAYMENT)) {
 				transportDocument.setPaymentStatus(PaymentStatus.updatePaymentStatus(transportDocument));
 			}
+
 			transportDocuments.add(transportDocument);
 		}
 		transportDocumentRepository.saveAll(transportDocuments);
@@ -79,7 +76,7 @@ public class TransportDocumentService {
 
 	private TransportDocument createOrUpdateTransportDocument(TransportDocumentDTO transportDocumentDTO) {
 		TransportDocument transportDocument = new TransportDocument(transportDocumentDTO);
-		findTransportDocumentByNumberAndSerie(transportDocumentDTO.getNumber(), transportDocumentDTO.getSerie())
+		findTransportDocumentByNumberAndSerieAndIssueDate(transportDocumentDTO.getNumber(), transportDocumentDTO.getSerie(), transportDocumentDTO.getIssueDate())
 				.ifPresent(existingTransportDocument -> {
 					transportDocument.setId(existingTransportDocument.getId());
 					transportDocument.setPaymentStatus(existingTransportDocument.getPaymentStatus());
@@ -102,7 +99,7 @@ public class TransportDocumentService {
 	}
 
 	public void updateByPayment(Payment payment) {
-		Optional<TransportDocument> transportDocumentOptional = transportDocumentRepository.findByNumberAndSerie(payment.getNumber(), payment.getSerie());
+		Optional<TransportDocument> transportDocumentOptional = transportDocumentRepository.findByNumberAndSerieAndAmount(payment.getNumber(), payment.getSerie(), payment.getAmount());
 		if (transportDocumentOptional.isPresent()){
 			TransportDocument transportDocument = transportDocumentOptional.get();
 			transportDocument.setPayment(payment);

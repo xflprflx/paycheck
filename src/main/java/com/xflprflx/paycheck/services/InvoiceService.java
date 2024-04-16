@@ -5,13 +5,16 @@ import com.xflprflx.paycheck.domain.TransportDocument;
 import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
 import com.xflprflx.paycheck.domain.enums.DeliveryStatus;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
+import com.xflprflx.paycheck.factory.FileProcessorFactory;
 import com.xflprflx.paycheck.repositories.InvoiceRepository;
 import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
 import com.xflprflx.paycheck.services.exceptions.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,4 +94,10 @@ public class InvoiceService {
 		invoiceRepository.deleteById(id);
 	}
 
+
+	public List<InvoiceDTO> returnInvoiceListFromFile(MultipartFile file) throws IOException {
+		String filename = file.getOriginalFilename();
+		FileProcessor fileProcessor = FileProcessorFactory.getFileProcessor(filename);
+		return fileProcessor.returnInvoiceListFromFile(file);
+	}
 }
