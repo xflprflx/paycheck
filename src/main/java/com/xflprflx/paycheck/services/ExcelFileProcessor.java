@@ -51,49 +51,66 @@ public class ExcelFileProcessor implements FileProcessor{
     @Override
     public List<TransportDocumentDTO> returnTransportDocumentListFromFile(MultipartFile file) throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        InputStream inputStream = file.getInputStream();
         List<TransportDocumentDTO> transportDocuments = new ArrayList<>();
-        try(Workbook workbook = new XSSFWorkbook(inputStream)) {
 
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
 
-            sheet.forEach(row -> {
-                if (row.getRowNum() != 0) {
-                    List<Cell> cells = new ArrayList<>();
-                    row.forEach(cell -> {
-                        if (cell != null && cell.getCellType() != CellType.BLANK) {
-                            cells.add(cell);
-                        }
-                    });
-                    Integer length = cells.size();
-
-                    String number = length > 0 ? processCell(cells.get(0)) : null;
-                    String serie = length > 1 ? processCell(cells.get(1)) : null;
-                    LocalDate issueDate = length > 2 ? LocalDate.parse(processCell(cells.get(2)), formatter) : null;
-                    String addressShipper = length > 3 ? processCell(cells.get(3)) : null;
-                    Double amount = length > 4 ? Double.parseDouble(processCell(cells.get(4))) : null;
-                    String invoice = length > 5 ? processCell(cells.get(5)) : null;
-                    String[] invoices = invoice != null ? invoice.split(", ") : new String[0];
-
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row != null) {
                     TransportDocumentDTO transportDocument = new TransportDocumentDTO();
-                    transportDocument.setNumber(number);
-                    transportDocument.setSerie(serie);
-                    transportDocument.setIssueDate(issueDate);
-                    transportDocument.setAddressShipper(addressShipper);
-                    transportDocument.setAmount(amount);
-                    for (String x : invoices) {
-                        var inv = new InvoiceDTO();
-                        inv.setNumber(x);
-                        transportDocument.getInvoices().add(inv);
+                    for (int j = 0; j < row.getLastCellNum(); j++) {
+                        Cell cell = row.getCell(j);
+                        if (cell != null) {
+                            String cellValue = processCell(cell);
+                            switch (j) {
+                                case 0:
+                                    transportDocument.setNumber(cellValue);
+                                    break;
+                                case 1:
+                                    transportDocument.setSerie(cellValue);
+                                    break;
+                                case 2:
+                                    if(cell.getCellType() != CellType.BLANK)
+                                        transportDocument.setIssueDate(LocalDate.parse(cellValue, formatter));
+                                    break;
+                                case 3:
+                                    transportDocument.setAddressShipper(cellValue);
+                                    break;
+                                case 4:
+                                    try {
+                                        transportDocument.setAmount(Double.parseDouble(cellValue));
+                                    } catch (NumberFormatException e) {
+                                        // Handle invalid amount format
+                                        transportDocument.setAmount(null);
+                                    }
+                                    break;
+                                case 5:
+                                    String[] invoices = cellValue.split(", ");
+                                    for (String invoice : invoices) {
+                                        var inv = new InvoiceDTO();
+                                        inv.setNumber(invoice);
+                                        transportDocument.getInvoices().add(inv);
+                                    }
+                                    break;
+                                default:
+                                    // Ignore additional cells if any
+                                    break;
+                            }
+                        }
                     }
                     transportDocuments.add(transportDocument);
                 }
-            });
-
-
-            return transportDocuments;
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            // Handle exceptions
+            e.printStackTrace();
         }
+
+        return transportDocuments;
     }
+
 
     private List<?> toList(Iterator<?> iterator) {
         return IteratorUtils.toList(iterator);
@@ -106,7 +123,6 @@ public class ExcelFileProcessor implements FileProcessor{
                 Date dateValue = cell.getDateCellValue();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
                 value = dateFormat.format(dateValue);
-                System.out.println(value);
             } else {
                 value = String.valueOf((int) cell.getNumericCellValue());
             }
