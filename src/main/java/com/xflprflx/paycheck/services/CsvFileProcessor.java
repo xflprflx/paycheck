@@ -5,6 +5,7 @@ import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.csv.QuoteMode;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -61,8 +62,9 @@ public class CsvFileProcessor implements FileProcessor {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         InputStream inputStream = file.getInputStream();
         List<TransportDocumentDTO> transportDocuments = new ArrayList<>();
-        try (CSVParser parser = new CSVParser(new InputStreamReader(inputStream), CSVFormat.DEFAULT)) {
+        try (CSVParser parser = new CSVParser(new InputStreamReader(inputStream), CSVFormat.DEFAULT.withDelimiter(';').withQuoteMode(QuoteMode.MINIMAL))) {
             for (CSVRecord record : parser) {
+                System.out.println(record);
                 if (record.getRecordNumber() != 1) {
                     String[] fields = record.get(0).split(";");
                     String number = fields.length > 0 ? fields[0] : null;
