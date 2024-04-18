@@ -104,7 +104,6 @@ public class ExcelFileProcessor implements FileProcessor{
                 }
             }
         } catch (IOException | IllegalArgumentException e) {
-            // Handle exceptions
             e.printStackTrace();
         }
 
@@ -123,8 +122,9 @@ public class ExcelFileProcessor implements FileProcessor{
                 Date dateValue = cell.getDateCellValue();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
                 value = dateFormat.format(dateValue);
-            } else {
-                value = String.valueOf((int) cell.getNumericCellValue());
+            }
+            else {
+                value = cell.getNumericCellValue() == Math.floor(cell.getNumericCellValue()) ? String.valueOf((int) cell.getNumericCellValue()) : String.valueOf(cell.getNumericCellValue());
             }
         } else {
             value = cell.toString();
