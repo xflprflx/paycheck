@@ -57,19 +57,23 @@ public class ExcelFileProcessor implements FileProcessor{
 
             Sheet sheet = workbook.getSheetAt(0);
 
-            List<Row> rows = (List<Row>) toList(sheet.iterator());
+            sheet.forEach(row -> {
+                if (row.getRowNum() != 0) {
+                    List<Cell> cells = new ArrayList<>();
+                    row.forEach(cell -> {
+                        if (cell != null && cell.getCellType() != CellType.BLANK) {
+                            cells.add(cell);
+                        }
+                    });
+                    Integer length = cells.size();
 
-            rows.forEach(row -> {
-                if(row.getRowNum() != 0) {
-                    List<Cell> cells = (List<Cell>) toList(row.cellIterator());
-                    Integer length = cells.stream().toArray().length;
-                    String number = length > 0 && cells.get(0).getCellType() != CellType.BLANK ? processCell(cells.get(0)) : null;
-                    String serie = length > 1 && cells.get(1).getCellType() != CellType.BLANK ? processCell(cells.get(1)) : null;
-                    LocalDate issueDate = length > 2 && cells.get(2).getCellType() != CellType.BLANK ? LocalDate.parse(processCell(cells.get(2)), formatter) : null;
-                    String addressShipper = length > 3 && cells.get(3).getCellType() != CellType.BLANK ? processCell(cells.get(3)) : null;
-                    Double amount = length > 4 && cells.get(4).getCellType() != CellType.BLANK ? Double.parseDouble(processCell(cells.get(4))) : null;
-                    String invoice = length > 5 && cells.get(5).getCellType() != CellType.BLANK ? processCell(cells.get(5)) : null;
-                    String[] invoices = invoice.split(", ");
+                    String number = length > 0 ? processCell(cells.get(0)) : null;
+                    String serie = length > 1 ? processCell(cells.get(1)) : null;
+                    LocalDate issueDate = length > 2 ? LocalDate.parse(processCell(cells.get(2)), formatter) : null;
+                    String addressShipper = length > 3 ? processCell(cells.get(3)) : null;
+                    Double amount = length > 4 ? Double.parseDouble(processCell(cells.get(4))) : null;
+                    String invoice = length > 5 ? processCell(cells.get(5)) : null;
+                    String[] invoices = invoice != null ? invoice.split(", ") : new String[0];
 
                     TransportDocumentDTO transportDocument = new TransportDocumentDTO();
                     transportDocument.setNumber(number);
@@ -77,11 +81,11 @@ public class ExcelFileProcessor implements FileProcessor{
                     transportDocument.setIssueDate(issueDate);
                     transportDocument.setAddressShipper(addressShipper);
                     transportDocument.setAmount(amount);
-                    Arrays.stream(invoices).forEach(x -> {
+                    for (String x : invoices) {
                         var inv = new InvoiceDTO();
                         inv.setNumber(x);
                         transportDocument.getInvoices().add(inv);
-                    });
+                    }
                     transportDocuments.add(transportDocument);
                 }
             });
