@@ -1,6 +1,7 @@
 package com.xflprflx.paycheck.services;
 
 import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
+import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -16,30 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CsvFileProcessor implements FileProcessor {
-
-    /*@Override
-    public List<InvoiceDTO> returnInvoiceListFromFile(MultipartFile file) throws IOException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        InputStream inputStream = file.getInputStream();
-        List<InvoiceDTO> invoices = new ArrayList<>();
-        try(CSVParser parser = new CSVParser(new InputStreamReader(inputStream), CSVFormat.DEFAULT)) {
-            for(CSVRecord record : parser) {
-                if (record.getRecordNumber() != 1) {
-                    String[] fields = record.get(0).split(";");
-                    String number = fields.length > 0 ? fields[0] : null;
-                    LocalDate scannedDate = fields.length > 1 && !fields[1].isEmpty() ? LocalDate.parse(fields[1].split(" ")[0], formatter) : null;
-                    LocalDate paymentApprovalDate = fields.length > 2 && !fields[2].isEmpty() ? LocalDate.parse(fields[2], formatter) : null;
-
-                    InvoiceDTO invoice = new InvoiceDTO();
-                    invoice.setNumber(number);
-                    invoice.setScannedDate(scannedDate);
-                    invoice.setPaymentApprovalDate(paymentApprovalDate);
-                    invoices.add(invoice);
-                }
-            }
-        }
-        return invoices;
-    }*/
 
     @Override
     public List<InvoiceDTO> returnInvoiceListFromFile(MultipartFile file) throws IOException {
@@ -77,6 +54,11 @@ public class CsvFileProcessor implements FileProcessor {
         }
 
         return invoices;
+    }
+
+    @Override
+    public List<TransportDocumentDTO> returnTransportDocumentListFromFile(MultipartFile file) throws IOException {
+        return null;
     }
 
 }

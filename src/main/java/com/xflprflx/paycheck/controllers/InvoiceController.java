@@ -26,7 +26,6 @@ public class InvoiceController {
 	public ResponseEntity<List<InvoiceDTO>> readInvoiceFile(@RequestParam("file") MultipartFile file) throws IOException {
 		List<InvoiceDTO> invoices = invoiceService.returnInvoiceListFromFile(file);
 		return ResponseEntity.ok().body(invoices);
-
 	}
 
 	@PostMapping(value = "/list")

@@ -1,5 +1,6 @@
 package com.xflprflx.paycheck.services;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import com.xflprflx.paycheck.domain.Payment;
 import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
 import com.xflprflx.paycheck.domain.dtos.PaymentDTO;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
+import com.xflprflx.paycheck.factory.FileProcessorFactory;
 import com.xflprflx.paycheck.repositories.InvoiceRepository;
 import org.bouncycastle.crypto.agreement.srp.SRP6Client;
 import org.springframework.beans.BeanUtils;
@@ -28,6 +30,7 @@ import com.xflprflx.paycheck.services.exceptions.ObjectNotFoundException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -217,5 +220,11 @@ public class TransportDocumentService {
 		List<TransportDocument>  transportDocuments = transportDocumentRepository.findAll(spec);
 		List<TransportDocumentDTO> transportDocumentDTOS = transportDocuments.stream().map(x -> new TransportDocumentDTO(x, x.getInvoices())).collect(Collectors.toList());
 		return transportDocumentDTOS;
+	}
+
+	public List<TransportDocumentDTO> returnTransportDocumentListFromFile(MultipartFile file) throws IOException {
+		String filename = file.getOriginalFilename();
+		FileProcessor fileProcessor = FileProcessorFactory.getFileProcessor(filename);
+		return fileProcessor.returnTransportDocumentListFromFile(file);
 	}
 }

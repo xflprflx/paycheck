@@ -7,9 +7,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -25,6 +28,13 @@ public class TransportDocumentController {
 		List<TransportDocumentDTO> result = transportDocumentService.findAllTransportDocuments();
 		return ResponseEntity.ok().body(result);
 	}
+
+	@PostMapping(value = "/file")
+	public ResponseEntity<List<TransportDocumentDTO>>  readTransportDocumentFile(@RequestParam("file")MultipartFile file) throws IOException {
+		List<TransportDocumentDTO> transportDocuments = transportDocumentService.returnTransportDocumentListFromFile(file);
+		return ResponseEntity.ok().body(transportDocuments);
+	}
+
 
 	@PostMapping(value = "/list")
 	public ResponseEntity<String> postTransportDocumentList(@Valid @RequestBody List<TransportDocumentDTO> transportDocumentDTOS) {
