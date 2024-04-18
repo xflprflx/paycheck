@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class CsvFileProcessor implements FileProcessor {
 
-    @Override
+    /*@Override
     public List<InvoiceDTO> returnInvoiceListFromFile(MultipartFile file) throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         InputStream inputStream = file.getInputStream();
@@ -32,12 +32,12 @@ public class CsvFileProcessor implements FileProcessor {
                     LocalDate scannedDate = null;
                     LocalDate paymentApprovalDate = null;
                     if (fields.length > 1 && !fields[1].isEmpty()) {
-                        scannedDate = LocalDate.parse(fields[1].split(" ")[0], formatter);
+                        scannedDate = LocalDate.parse(fields[1].replaceAll("\"","").split(" ")[0], formatter);
                     }
                     System.out.println(scannedDate);
 
                     if (fields.length > 2 && !fields[2].isEmpty()) {
-                        paymentApprovalDate = LocalDate.parse(fields[2], formatter);
+                        paymentApprovalDate = LocalDate.parse(fields[2].replaceAll("\"",""), formatter);
                     }
                     System.out.println(paymentApprovalDate);
 
@@ -54,7 +54,7 @@ public class CsvFileProcessor implements FileProcessor {
         }
 
         return invoices;
-    }
+    }*/
 
 
     @Override
@@ -84,8 +84,6 @@ public class CsvFileProcessor implements FileProcessor {
                 for (CSVRecord record : parser2) {
                     if (record.getRecordNumber() != 1) {
 
-
-                        System.out.println(record);
                         // Processar cada registro e criar objetos TransportDocumentDTO
                         String number = record.get(0);
                         String serie = record.get(1);
@@ -122,15 +120,52 @@ public class CsvFileProcessor implements FileProcessor {
         return transportDocuments;
     }
 
-/*    // Método para converter uma string que representa um valor numérico em double
-    private Double parseAmountString(String amountStr) {
-        // Substituir vírgulas que estão entre dígitos numéricos por pontos
-        amountStr = amountStr.replaceAll("(?<=\\d),(?=\\d)", ".");
+    @Override
+    public List<InvoiceDTO> returnInvoiceListFromFile(MultipartFile file) throws IOException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        InputStream inputStream = file.getInputStream();
+        List<InvoiceDTO> invoices = new ArrayList<>();
 
-        // Converter a string para double
-        return Double.parseDouble(amountStr);
-    }*/
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+             CSVParser parser = new CSVParser(bufferedReader,
+                     CSVFormat.DEFAULT.withDelimiter(';'))) {
 
+            List<String> lines = bufferedReader.lines().collect(Collectors.toList());
+            List<String> processedLines = new ArrayList<>();
+
+            // Processar as linhas para substituir vírgulas por pontos em valores numéricos
+            for (String line : lines) {
+                processedLines.add(line.replaceAll("(?<=\\d),(?=\\d{2}(?:\\.)?\\d+)", "."));
+            }
+
+
+            // Recriar o BufferedReader com as linhas processadas
+            try (BufferedReader processedReader = new BufferedReader(new StringReader(String.join(System.lineSeparator(), processedLines)))) {
+                CSVParser parser2 = new CSVParser(processedReader,
+                        CSVFormat.DEFAULT.withDelimiter(';'));
+
+                for (CSVRecord record : parser2) {
+                    if (record.getRecordNumber() != 1) {
+
+                        // Processar cada registro e criar objetos TransportDocumentDTO
+                        String number = record.get(0);
+                        LocalDate scannedDate = record.get(1).length() > 0 ? LocalDate.parse(record.get(1).split(" ")[0], formatter) : null;
+                        LocalDate paymentApprovalDate = record.get(2).length() > 0 ? LocalDate.parse(record.get(2).split(" ")[0], formatter) : null;
+
+                        InvoiceDTO invoice = new InvoiceDTO();
+                        invoice.setNumber(number);
+                        invoice.setScannedDate(scannedDate);
+                        invoice.setPaymentApprovalDate(paymentApprovalDate);
+                        invoices.add(invoice);
+                    }
+                }
+            }
+        } catch (IOException | DateTimeParseException e) {
+            e.printStackTrace();
+        }
+
+        return invoices;
+    }
 }
 
 
