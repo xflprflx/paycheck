@@ -31,8 +31,8 @@ public class PaymentService {
 	private TransportDocumentService transportDocumentService;
 
 	@Transactional
-	public List<PaymentDTO> savePayments(List<Payment> payments) {
-		List<PaymentDTO> paymentDTOS = new ArrayList<>();
+	public List<Payment> savePayments(List<Payment> payments) {
+		List<Payment> paymentDTOS = new ArrayList<>();
 		for (Payment payment : payments) {
 			Optional<Payment> optionalPayment = paymentRepository.findByNumber(payment.getNumber());
 			if (optionalPayment.isPresent()) {
@@ -40,7 +40,7 @@ public class PaymentService {
 			}
 			payment = paymentRepository.save(payment);
 			transportDocumentService.updateByPayment(payment);
-			paymentDTOS.add(new PaymentDTO(payment));
+			paymentDTOS.add(payment);
 		}
 		return paymentDTOS;
 	}

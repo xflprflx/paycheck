@@ -28,10 +28,14 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
-    @PostMapping
-    public ResponseEntity<String> postPaymentList(@RequestParam("file")MultipartFile file) throws IOException {
-        //List<Payment> payments = pdfService.tableFromPdfToPaymentObject(file);
-        List<Payment> payments = pdfService.pdfToPaymentObject(file);
+    @PostMapping(value = "/file")
+    public ResponseEntity<List<PaymentDTO>>  readPaymentFile(@RequestParam("file")MultipartFile file) throws IOException {
+        List<PaymentDTO> payments = pdfService.pdfToPaymentObject(file);
+        return ResponseEntity.ok().body(payments);
+    }
+
+    @PostMapping(value = "/list")
+    public ResponseEntity<String> postPaymentList(@RequestBody List<Payment> payments) throws IOException {
         paymentService.savePayments(payments);
         return ResponseEntity.ok().body("Pagamentos salvos com sucesso.");
     }
