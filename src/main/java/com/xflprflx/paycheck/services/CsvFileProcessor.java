@@ -65,12 +65,12 @@ public class CsvFileProcessor implements FileProcessor {
 
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              CSVParser parser = new CSVParser(bufferedReader,
-                     CSVFormat.DEFAULT.withDelimiter(';').withFirstRecordAsHeader())) {
+                     CSVFormat.DEFAULT.withDelimiter(';'))) {
 
             List<String> lines = bufferedReader.lines().collect(Collectors.toList());
             List<String> processedLines = new ArrayList<>();
 
-// Processar as linhas para substituir vírgulas por pontos em valores numéricos
+            // Processar as linhas para substituir vírgulas por pontos em valores numéricos
             for (String line : lines) {
                 processedLines.add(line.replaceAll("(?<=\\d),(?=\\d{2}(?:\\.)?\\d+)", "."));
             }
@@ -79,35 +79,40 @@ public class CsvFileProcessor implements FileProcessor {
             // Recriar o BufferedReader com as linhas processadas
             try (BufferedReader processedReader = new BufferedReader(new StringReader(String.join(System.lineSeparator(), processedLines)))) {
                 CSVParser parser2 = new CSVParser(processedReader,
-                        CSVFormat.DEFAULT.withDelimiter(';').withFirstRecordAsHeader());
+                        CSVFormat.DEFAULT.withDelimiter(';'));
 
                 for (CSVRecord record : parser2) {
-                    System.out.println(record);
-                    // Processar cada registro e criar objetos TransportDocumentDTO
-                    String number = record.get(0);
-                    String serie = record.get(1);
-                    LocalDate issueDate = LocalDate.parse(record.get(2).split(" ")[0], formatter);
-                    String addressShipper = record.get(3);
+                    if (record.getRecordNumber() != 1) {
 
-                    System.out.println(record.get(4));
+
+                        System.out.println(record);
+                        // Processar cada registro e criar objetos TransportDocumentDTO
+                        String number = record.get(0);
+                        String serie = record.get(1);
+                        LocalDate issueDate = record.get(2).length() > 0 ? LocalDate.parse(record.get(2).split(" ")[0], formatter) : null;
+                        String addressShipper = record.get(3);
+
+                        System.out.println(record.get(4));
 //                    Double amount = Double.parseDouble(record.get(4).replace(".", ""));
-                    Double amount = (Double.valueOf(record.get(4).toString().replaceAll("\\.", "").replace(",", ".")));
-                    System.out.println(amount);
-                    String[] invoices = record.get(5).split(", ");
+                        Double amount = record.get(4).length() > 0 ? (Double.valueOf(record.get(4).toString().replaceAll("\\.", "").replace(",", "."))) : null;
+                        System.out.println(amount);
+                        String[] invoices = record.get(4).length() > 0 ? record.get(5).split(", ") : new String[0];
 
-                    TransportDocumentDTO transportDocument = new TransportDocumentDTO();
-                    transportDocument.setNumber(number);
-                    transportDocument.setSerie(serie);
-                    transportDocument.setIssueDate(issueDate);
-                    transportDocument.setAddressShipper(addressShipper);
-                    transportDocument.setAmount(amount);
-                    System.out.println(transportDocument.getAmount());
-                    Arrays.stream(invoices).forEach(x -> {
-                        var inv = new InvoiceDTO();
-                        inv.setNumber(x);
-                        transportDocument.getInvoices().add(inv);
-                    });
-                    transportDocuments.add(transportDocument);
+                        TransportDocumentDTO transportDocument = new TransportDocumentDTO();
+                        transportDocument.setNumber(number);
+                        transportDocument.setSerie(serie);
+                        transportDocument.setIssueDate(issueDate);
+                        transportDocument.setAddressShipper(addressShipper);
+                        transportDocument.setAmount(amount);
+                        System.out.println(transportDocument.getAmount());
+                        System.out.println("notas "+invoices.length);
+                        Arrays.stream(invoices).forEach(x -> {
+                            var inv = new InvoiceDTO();
+                            inv.setNumber(x);
+                            transportDocument.getInvoices().add(inv);
+                        });
+                        transportDocuments.add(transportDocument);
+                    }
                 }
             }
         } catch (IOException | DateTimeParseException e) {
