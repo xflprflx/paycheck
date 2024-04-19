@@ -2,11 +2,8 @@ package com.xflprflx.paycheck.controllers;
 
 import com.xflprflx.paycheck.domain.Payment;
 import com.xflprflx.paycheck.domain.dtos.PaymentDTO;
-import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
-import com.xflprflx.paycheck.services.ApachePdfService;
 import com.xflprflx.paycheck.services.PaymentService;
 import com.xflprflx.paycheck.services.PdfService;
-import com.xflprflx.paycheck.services.TabulaPdfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;

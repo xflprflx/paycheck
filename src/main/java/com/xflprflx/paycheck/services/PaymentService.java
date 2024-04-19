@@ -1,15 +1,9 @@
 package com.xflprflx.paycheck.services;
 
-import com.xflprflx.paycheck.domain.Invoice;
 import com.xflprflx.paycheck.domain.Payment;
-import com.xflprflx.paycheck.domain.TransportDocument;
-import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
 import com.xflprflx.paycheck.domain.dtos.PaymentDTO;
-import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
-import com.xflprflx.paycheck.repositories.InvoiceRepository;
 import com.xflprflx.paycheck.repositories.PaymentRepository;
-import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;

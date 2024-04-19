@@ -1,18 +1,16 @@
 package com.xflprflx.paycheck.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
+import com.xflprflx.paycheck.domain.enums.DeliveryStatus;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
-import com.xflprflx.paycheck.domain.enums.DeliveryStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity

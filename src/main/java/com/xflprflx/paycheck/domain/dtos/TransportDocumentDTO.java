@@ -3,7 +3,6 @@ package com.xflprflx.paycheck.domain.dtos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.xflprflx.paycheck.domain.Invoice;
-import com.xflprflx.paycheck.domain.Payment;
 import com.xflprflx.paycheck.domain.TransportDocument;
 import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 
@@ -12,7 +11,6 @@ import javax.persistence.Enumerated;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;

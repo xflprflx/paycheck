@@ -1,38 +1,28 @@
 package com.xflprflx.paycheck.services;
 
+import com.xflprflx.paycheck.domain.Invoice;
+import com.xflprflx.paycheck.domain.Payment;
+import com.xflprflx.paycheck.domain.TransportDocument;
+import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
+import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
+import com.xflprflx.paycheck.domain.enums.PaymentStatus;
+import com.xflprflx.paycheck.factory.FileProcessorFactory;
+import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
+import com.xflprflx.paycheck.services.exceptions.ObjectNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import com.xflprflx.paycheck.domain.Invoice;
-import com.xflprflx.paycheck.domain.Payment;
-import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
-import com.xflprflx.paycheck.domain.dtos.PaymentDTO;
-import com.xflprflx.paycheck.domain.enums.PaymentStatus;
-import com.xflprflx.paycheck.factory.FileProcessorFactory;
-import com.xflprflx.paycheck.repositories.InvoiceRepository;
-import org.bouncycastle.crypto.agreement.srp.SRP6Client;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
-import com.xflprflx.paycheck.domain.TransportDocument;
-import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
-import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
-import com.xflprflx.paycheck.services.exceptions.ObjectNotFoundException;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.persistence.EntityNotFoundException;
 
 @Service
 public class TransportDocumentService {

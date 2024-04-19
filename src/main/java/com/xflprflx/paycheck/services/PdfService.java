@@ -1,6 +1,5 @@
 package com.xflprflx.paycheck.services;
 
-import com.xflprflx.paycheck.domain.Payment;
 import com.xflprflx.paycheck.domain.dtos.PaymentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

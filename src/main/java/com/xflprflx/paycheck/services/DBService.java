@@ -1,19 +1,9 @@
 package com.xflprflx.paycheck.services;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.xflprflx.paycheck.domain.Invoice;
-import com.xflprflx.paycheck.domain.TransportDocument;
-import com.xflprflx.paycheck.domain.enums.DeliveryStatus;
-import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 import com.xflprflx.paycheck.repositories.InvoiceRepository;
 import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class DBService {

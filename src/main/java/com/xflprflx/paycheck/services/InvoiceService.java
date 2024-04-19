@@ -8,7 +8,6 @@ import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 import com.xflprflx.paycheck.factory.FileProcessorFactory;
 import com.xflprflx.paycheck.repositories.InvoiceRepository;
 import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
-import com.xflprflx.paycheck.services.exceptions.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
