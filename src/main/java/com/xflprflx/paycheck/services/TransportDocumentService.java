@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.JoinType;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class TransportDocumentService {
 
 	@Transactional(readOnly = true)
 	public List<TransportDocumentDTO> findAllTransportDocuments() {
-		List<TransportDocument> transportDocuments = this.transportDocumentRepository.findAll();
+		List<TransportDocument> transportDocuments = this.transportDocumentRepository.findTransportDocumentsPayments();
 		return transportDocuments.stream().map(x -> new TransportDocumentDTO(x, x.getInvoices())).collect(Collectors.toList());
 	}
 
@@ -197,12 +198,17 @@ public class TransportDocumentService {
 				return builder.between(root.join("invoices").get("paymentApprovalDate"), approvalStart, approvalEnd);
 			});
 		}
-		if (paymentStart != null && paymentEnd != null) {
-			spec = spec.and((root, query, builder) -> {
-				query.distinct(true);
+
+		// Move o fetch para fora do bloco condicional
+		spec = spec.and((root, query, builder) -> {
+			query.distinct(true);
+			root.fetch("payment", JoinType.LEFT); // Join fetch para evitar N+1 selects
+			if (paymentStart != null && paymentEnd != null) {
 				return builder.between(root.join("payment").get("paymentDate"), paymentStart, paymentEnd);
-			});
-		}
+			}
+			return null;
+		});
+
 		if(paymentStatus != null) {
 			spec = spec.and((root, query, builder) -> builder.equal(root.get("paymentStatus"), PaymentStatus.toEnum(paymentStatus)));
 		}

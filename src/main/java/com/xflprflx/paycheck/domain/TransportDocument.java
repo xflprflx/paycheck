@@ -47,7 +47,7 @@ public class TransportDocument implements Serializable {
 		inverseJoinColumns = @JoinColumn(name = "invoice_id"))
     private Set<Invoice> invoices = new HashSet<>();
 
-	@ManyToOne(cascade = {CascadeType.REMOVE})
+	@ManyToOne(cascade = {CascadeType.REMOVE}, fetch = FetchType.LAZY)
 	@JoinColumn(name = "payment_id")
 	private Payment payment;
 
