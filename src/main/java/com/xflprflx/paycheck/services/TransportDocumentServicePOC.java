@@ -97,11 +97,20 @@ public class TransportDocumentServicePOC {
 
 	private void processInvoices(TransportDocumentDTO transportDocumentDTO, TransportDocument transportDocument, List<Invoice> allInvoices) {
 		for (InvoiceDTO invoiceDTO : transportDocumentDTO.getInvoices()) {
-			Invoice invoice = allInvoices.stream()
+			Optional<Invoice> existingInvoice = allInvoices.stream()
 					.filter(inv -> inv.getNumber().equals(invoiceDTO.getNumber()))
-					.findFirst()
-					.orElseGet(() -> invoiceService.save(new Invoice(invoiceDTO)));
-			transportDocument.getInvoices().add(invoice);
+					.findFirst();
+
+			if (existingInvoice.isPresent()) {
+				// Se a fatura já existe, atualize-a com os dados do DTO
+				Invoice invoice = existingInvoice.get();
+				transportDocument.getInvoices().add(invoice);
+			} else {
+				// Se a fatura não existe, crie uma nova
+				Invoice newInvoice = invoiceService.save(new Invoice(invoiceDTO));
+				transportDocument.getInvoices().add(newInvoice);
+				allInvoices.add(newInvoice);
+			}
 		}
 	}
 
