@@ -2,6 +2,7 @@ package com.xflprflx.paycheck.controllers;
 
 import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 import com.xflprflx.paycheck.services.TransportDocumentService;
+import com.xflprflx.paycheck.services.TransportDocumentServicePOC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,9 @@ public class TransportDocumentController {
 	@Autowired
 	private TransportDocumentService transportDocumentService;
 
+	@Autowired
+	private TransportDocumentServicePOC transportDocumentServicePOC;
+
 	@GetMapping
 	public ResponseEntity<List<TransportDocumentDTO>> findAllTransportDocuments() {
 		List<TransportDocumentDTO> result = transportDocumentService.findAllTransportDocuments();
@@ -37,8 +41,13 @@ public class TransportDocumentController {
 
 	@PostMapping(value = "/list")
 	public ResponseEntity<String> postTransportDocumentList(@Valid @RequestBody List<TransportDocumentDTO> transportDocumentDTOS) {
+		long startTime = System.nanoTime();
+
 		try {
-			transportDocumentService.saveCteWithInvoice(transportDocumentDTOS);
+			transportDocumentServicePOC.saveCteWithInvoice(transportDocumentDTOS);
+			long endTime = System.nanoTime();
+			long duration = (endTime - startTime) / 1000000; // Convertendo nanos para milissegundos
+			System.out.println("Tempo de execução da consulta: " + duration + " milissegundos");
 			return ResponseEntity.ok().body("CT-es salvos com sucesso.");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
