@@ -53,11 +53,17 @@ public class TransportDocumentService {
 	@Transactional
 	public void saveCteWithInvoice(List<TransportDocumentDTO> transportDocumentDTOS) {
 		List<TransportDocument> transportDocuments = new ArrayList<>();
+
+		List<Invoice> allInvoices = invoiceService.findAll();
+		List<TransportDocument> allTransportDocuments = transportDocumentRepository.findAll();
+		List<Payment> allPayments = paymentService.findAll();
+
 		for (TransportDocumentDTO transportDocumentDTO : transportDocumentDTOS) {
-			TransportDocument transportDocument = createOrUpdateTransportDocument(transportDocumentDTO);
-			processInvoices(transportDocumentDTO, transportDocument);
+			TransportDocument transportDocument = createOrUpdateTransportDocument(transportDocumentDTO, allTransportDocuments);
+			processInvoices(transportDocumentDTO, transportDocument, allInvoices);
 			transportDocument = updateTransportDocumentPaymentForecast(transportDocument);
-			associatePayment(transportDocumentDTO, transportDocument);
+			associatePayment(transportDocumentDTO, transportDocument, allPayments);
+
 			if (!transportDocument.getPaymentStatus().equals(PaymentStatus.DEBATE_PAYMENT)) {
 				transportDocument.setPaymentStatus(PaymentStatus.updatePaymentStatus(transportDocument));
 			}
@@ -67,28 +73,43 @@ public class TransportDocumentService {
 		transportDocumentRepository.saveAll(transportDocuments);
 	}
 
-	private TransportDocument createOrUpdateTransportDocument(TransportDocumentDTO transportDocumentDTO) {
+	private TransportDocument createOrUpdateTransportDocument(TransportDocumentDTO transportDocumentDTO, List<TransportDocument> allTransportDocuments) {
 		TransportDocument transportDocument = new TransportDocument(transportDocumentDTO);
-		findTransportDocumentByNumberAndSerieAndIssueDate(transportDocumentDTO.getNumber(), transportDocumentDTO.getSerie(), transportDocumentDTO.getIssueDate())
-				.ifPresent(existingTransportDocument -> {
-					transportDocument.setId(existingTransportDocument.getId());
-					transportDocument.setPaymentStatus(existingTransportDocument.getPaymentStatus());
-					transportDocument.setReasonReduction(existingTransportDocument.getReasonReduction());
-				});
+		Optional<TransportDocument> existingTransportDocument = allTransportDocuments.stream()
+				.filter(td -> td.getNumber().equals(transportDocumentDTO.getNumber()) &&
+						td.getSerie().equals(transportDocumentDTO.getSerie()) &&
+						td.getIssueDate().equals(transportDocumentDTO.getIssueDate()))
+				.findFirst();
+		existingTransportDocument.ifPresent(existing -> {
+			transportDocument.setId(existing.getId());
+			transportDocument.setPaymentStatus(existing.getPaymentStatus());
+			transportDocument.setReasonReduction(existing.getReasonReduction());
+		});
 		return transportDocument;
 	}
 
-	private void processInvoices(TransportDocumentDTO transportDocumentDTO, TransportDocument transportDocument) {
-		for (InvoiceDTO invoiceDTO : transportDocumentDTO.getInvoices()) {
-			Invoice invoice = invoiceService.findByNumber(invoiceDTO.getNumber())
-					.orElseGet(() -> invoiceService.save(new Invoice(invoiceDTO)));
-			transportDocument.getInvoices().add(invoice);
-		}
+	private void associatePayment(TransportDocumentDTO transportDocumentDTO, TransportDocument transportDocument, List<Payment> allPayments) {
+		Optional<Payment> payment = allPayments.stream()
+				.filter(p -> p.getNumber().equals(transportDocumentDTO.getNumber()))
+				.findFirst();
+		payment.ifPresent(transportDocument::setPayment);
 	}
 
-	private void associatePayment(TransportDocumentDTO transportDocumentDTO, TransportDocument transportDocument) {
-		paymentService.findPaymentByNumber(transportDocumentDTO.getNumber())
-				.ifPresent(transportDocument::setPayment);
+	private void processInvoices(TransportDocumentDTO transportDocumentDTO, TransportDocument transportDocument, List<Invoice> allInvoices) {
+		for (InvoiceDTO invoiceDTO : transportDocumentDTO.getInvoices()) {
+			Optional<Invoice> existingInvoice = allInvoices.stream()
+					.filter(inv -> inv.getNumber().equals(invoiceDTO.getNumber()))
+					.findFirst();
+
+			if (existingInvoice.isPresent()) {
+				Invoice invoice = existingInvoice.get();
+				transportDocument.getInvoices().add(invoice);
+			} else {
+				Invoice newInvoice = invoiceService.save(new Invoice(invoiceDTO));
+				transportDocument.getInvoices().add(newInvoice);
+				allInvoices.add(newInvoice);
+			}
+		}
 	}
 
 	public void updateByPayment(Payment payment) {

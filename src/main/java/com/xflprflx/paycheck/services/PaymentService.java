@@ -44,9 +44,14 @@ public class PaymentService {
     }
 
 	@Transactional
-    public List<PaymentDTO> findAll() {
+    public List<PaymentDTO> findAllPaymentDTO() {
 		List<Payment> payments = paymentRepository.findAll();
     	return payments.stream().map(x -> new PaymentDTO(x)).collect(Collectors.toList());
+	}
+
+	@Transactional
+	public List<Payment> findAll() {
+		return paymentRepository.findAll();
 	}
 
 	@Transactional

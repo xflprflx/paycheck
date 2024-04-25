@@ -2,7 +2,6 @@ package com.xflprflx.paycheck.controllers;
 
 import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 import com.xflprflx.paycheck.services.TransportDocumentService;
-import com.xflprflx.paycheck.services.TransportDocumentServicePOC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -23,9 +22,6 @@ public class TransportDocumentController {
 	@Autowired
 	private TransportDocumentService transportDocumentService;
 
-	@Autowired
-	private TransportDocumentServicePOC transportDocumentServicePOC;
-
 	@GetMapping
 	public ResponseEntity<List<TransportDocumentDTO>> findAllTransportDocuments() {
 		List<TransportDocumentDTO> result = transportDocumentService.findAllTransportDocuments();
@@ -44,7 +40,7 @@ public class TransportDocumentController {
 		long startTime = System.nanoTime();
 
 		try {
-			transportDocumentServicePOC.saveCteWithInvoice(transportDocumentDTOS);
+			transportDocumentService.saveCteWithInvoice(transportDocumentDTOS);
 			long endTime = System.nanoTime();
 			long duration = (endTime - startTime) / 1000000; // Convertendo nanos para milissegundos
 			System.out.println("Tempo de execução da consulta: " + duration + " milissegundos");

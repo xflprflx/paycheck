@@ -42,6 +42,11 @@ public class InvoiceService {
 	}
 
 	@Transactional
+	public List<Invoice> findAll() {
+		return invoiceRepository.findAll();
+	}
+
+	@Transactional
 	public void saveInvoices(List<InvoiceDTO> invoiceDTOS) {
 		List<Invoice> invoices = new ArrayList<>();
 		for (InvoiceDTO invoiceDTO : invoiceDTOS) {

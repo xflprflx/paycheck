@@ -39,7 +39,7 @@ public class PaymentController {
 
     @GetMapping
     public ResponseEntity<List<PaymentDTO>> findAll() {
-        List<PaymentDTO> paymentDTOS = paymentService.findAll();
+        List<PaymentDTO> paymentDTOS = paymentService.findAllPaymentDTO();
         return ResponseEntity.ok().body(paymentDTOS);
     }
 
