@@ -26,17 +26,22 @@ public class PaymentService {
 
 	@Transactional
 	public List<Payment> savePayments(List<Payment> payments) {
+		List<Payment> allPayments = paymentRepository.findAll();
 		List<Payment> paymentDTOS = new ArrayList<>();
 		for (Payment payment : payments) {
-			Optional<Payment> optionalPayment = paymentRepository.findByNumber(payment.getNumber());
-			if (optionalPayment.isPresent()) {
-				payment.setId(optionalPayment.get().getId());
-			}
-			payment = paymentRepository.save(payment);
-			transportDocumentService.updateByPayment(payment);
-			paymentDTOS.add(payment);
+			final Payment currentPayment = payment;
+			Optional<Payment> optionalPayment = allPayments.stream()
+					.filter(pay -> pay.getNumber().equals(currentPayment.getNumber()))
+					.findFirst();
+
+			optionalPayment.ifPresent(existing -> {
+				currentPayment.setId(existing.getId());
+			});
+			paymentDTOS.add(currentPayment);
 		}
-		return paymentDTOS;
+		List<Payment> savedPayments = paymentRepository.saveAll(paymentDTOS);
+		transportDocumentService.updateByPayment(savedPayments);
+		return savedPayments;
 	}
 
     public Optional<Payment> findPaymentByNumber(String number) {
