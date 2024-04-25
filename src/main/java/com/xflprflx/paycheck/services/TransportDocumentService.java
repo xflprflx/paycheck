@@ -40,11 +40,6 @@ public class TransportDocumentService {
 	private PaymentForecastCalculatorService paymentForecastCalculatorService;
 
 	@Transactional(readOnly = true)
-	public Optional<TransportDocument> findTransportDocumentByNumberAndSerieAndIssueDate(String numberTransportDocument, String serie, LocalDate issueDate) {
-		return transportDocumentRepository.findByNumberAndSerieAndIssueDate(numberTransportDocument, serie, issueDate);
-	}
-
-	@Transactional(readOnly = true)
 	public List<TransportDocumentDTO> findAllTransportDocuments() {
 		List<TransportDocument> transportDocuments = this.transportDocumentRepository.findAll();
 		return transportDocuments.stream().map(x -> new TransportDocumentDTO(x, x.getInvoices())).collect(Collectors.toList());
@@ -112,14 +107,22 @@ public class TransportDocumentService {
 		}
 	}
 
-	public void updateByPayment(Payment payment) {
-		Optional<TransportDocument> transportDocumentOptional = transportDocumentRepository.findByNumberAndSerieAndAmount(payment.getNumber(), payment.getSerie(), payment.getAmount());
-		if (transportDocumentOptional.isPresent()){
-			TransportDocument transportDocument = transportDocumentOptional.get();
-			transportDocument.setPayment(payment);
-			transportDocument.setPaymentStatus(PaymentStatus.updatePaymentStatus(transportDocument));
-			transportDocumentRepository.save(transportDocument);
+	public void updateByPayment(List<Payment> payments) {
+		List<TransportDocument> allTransportDocuments = transportDocumentRepository.findAll();
+		List<TransportDocument> transportDocumentsToUpdate = new ArrayList<>();
+		for (Payment payment : payments) {
+			Optional<TransportDocument> transportDocumentOptional = allTransportDocuments.stream()
+					.filter(transportDocument -> transportDocument.getNumber().equals(payment.getNumber()) &&
+							transportDocument.getSerie().equals(payment.getSerie()) &&
+							transportDocument.getAmount().equals(payment.getAmount()))
+					.findFirst();
+			transportDocumentOptional.ifPresent(existing -> {
+				existing.setPayment(payment);
+				existing.setPaymentStatus(PaymentStatus.updatePaymentStatus(existing));
+				transportDocumentsToUpdate.add(existing);
+			});
 		}
+		transportDocumentRepository.saveAll(transportDocumentsToUpdate);
 	}
 
 	public TransportDocument updateTransportDocumentPaymentForecast(TransportDocument transportDocument) {
