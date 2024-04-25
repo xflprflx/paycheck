@@ -24,7 +24,6 @@ public class TransportDocument implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	@Column(unique = false)
 	private String number;
 	private String serie;
 	private Double amount;

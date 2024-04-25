@@ -41,8 +41,10 @@ public class TransportDocumentService {
 
 	@Transactional(readOnly = true)
 	public List<TransportDocumentDTO> findAllTransportDocuments() {
-		List<TransportDocument> transportDocuments = this.transportDocumentRepository.findAll();
-		return transportDocuments.stream().map(x -> new TransportDocumentDTO(x, x.getInvoices())).collect(Collectors.toList());
+		List<TransportDocument> transportDocuments = transportDocumentRepository.findAllWithPayment();
+		return transportDocuments.stream()
+				.map(x -> new TransportDocumentDTO(x, x.getInvoices()))
+				.collect(Collectors.toList());
 	}
 
 	@Transactional

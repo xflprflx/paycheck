@@ -1,16 +1,19 @@
 package com.xflprflx.paycheck.repositories;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.xflprflx.paycheck.domain.TransportDocument;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
 
 public interface TransportDocumentRepository extends JpaRepository<TransportDocument, Integer>, JpaSpecificationExecutor<TransportDocument> {
 
-    Optional<TransportDocument> findByNumberAndSerieAndIssueDate(String integer, String serie, LocalDate issueDate);
+    @Query("SELECT td FROM TransportDocument td JOIN FETCH td.payment WHERE td IN :transportDocuments")
+    List<TransportDocument> findTransportDocumentPayments(@Param("transportDocuments") List<TransportDocument> transportDocuments);
 
-    Optional<TransportDocument> findByNumberAndSerieAndAmount(String integer, String serie, Double amount);
+    @Query("SELECT td FROM TransportDocument td LEFT JOIN FETCH td.payment")
+    List<TransportDocument> findAllWithPayment();
+
 }
