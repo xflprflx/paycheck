@@ -46,24 +46,6 @@ public class InvoiceService {
 		return invoiceRepository.findAll();
 	}
 
-	/*@Transactional
-	public void saveInvoices(List<InvoiceDTO> invoiceDTOS) {
-		List<Invoice> invoices = new ArrayList<>();
-		for (InvoiceDTO invoiceDTO : invoiceDTOS) {
-			findByNumber(invoiceDTO.getNumber()).ifPresent(oldInvoice -> {
-				Invoice invoice = new Invoice(invoiceDTO);
-				invoice.setId(oldInvoice.getId());
-				oldInvoice.getTransportDocuments().forEach(invoice.getTransportDocuments()::add);
-				if (invoiceDTO.getScannedDate() != null) {
-					invoice.setDeliveryStatus(DeliveryStatus.DELIVERED);
-				}
-				invoices.add(invoice);
-			});
-		}
-		invoiceRepository.saveAll(invoices);
-		updatePaymentForecastIfNeeded(invoices);
-	}*/
-
 	@Transactional
 	public void saveInvoices(List<InvoiceDTO> invoiceDTOS) {
 		List<Invoice> allInvoices = invoiceRepository.findAll();
