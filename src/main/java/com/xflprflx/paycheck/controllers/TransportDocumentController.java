@@ -37,13 +37,8 @@ public class TransportDocumentController {
 
 	@PostMapping(value = "/list")
 	public ResponseEntity<String> postTransportDocumentList(@Valid @RequestBody List<TransportDocumentDTO> transportDocumentDTOS) {
-		long startTime = System.nanoTime();
-
 		try {
 			transportDocumentService.saveCteWithInvoice(transportDocumentDTOS);
-			long endTime = System.nanoTime();
-			long duration = (endTime - startTime) / 1000000; // Convertendo nanos para milissegundos
-			System.out.println("Tempo de execução da consulta: " + duration + " milissegundos");
 			return ResponseEntity.ok().body("CT-es salvos com sucesso.");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
