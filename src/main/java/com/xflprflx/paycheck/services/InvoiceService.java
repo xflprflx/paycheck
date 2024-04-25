@@ -46,7 +46,7 @@ public class InvoiceService {
 		return invoiceRepository.findAll();
 	}
 
-	@Transactional
+	/*@Transactional
 	public void saveInvoices(List<InvoiceDTO> invoiceDTOS) {
 		List<Invoice> invoices = new ArrayList<>();
 		for (InvoiceDTO invoiceDTO : invoiceDTOS) {
@@ -54,6 +54,26 @@ public class InvoiceService {
 				Invoice invoice = new Invoice(invoiceDTO);
 				invoice.setId(oldInvoice.getId());
 				oldInvoice.getTransportDocuments().forEach(invoice.getTransportDocuments()::add);
+				if (invoiceDTO.getScannedDate() != null) {
+					invoice.setDeliveryStatus(DeliveryStatus.DELIVERED);
+				}
+				invoices.add(invoice);
+			});
+		}
+		invoiceRepository.saveAll(invoices);
+		updatePaymentForecastIfNeeded(invoices);
+	}*/
+
+	@Transactional
+	public void saveInvoices(List<InvoiceDTO> invoiceDTOS) {
+		List<Invoice> allInvoices = invoiceRepository.findAll();
+		List<Invoice> invoices = new ArrayList<>();
+		for (InvoiceDTO invoiceDTO : invoiceDTOS) {
+			Optional<Invoice> invoiceOptional = allInvoices.stream().filter(invoice -> invoice.getNumber().equals(invoiceDTO.getNumber())).findFirst();
+			invoiceOptional.ifPresent(existing -> {
+				Invoice invoice = new Invoice(invoiceDTO);
+				invoice.setId(existing.getId());
+				existing.getTransportDocuments().forEach(invoice.getTransportDocuments()::add);
 				if (invoiceDTO.getScannedDate() != null) {
 					invoice.setDeliveryStatus(DeliveryStatus.DELIVERED);
 				}
