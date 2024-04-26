@@ -84,35 +84,40 @@ public class DashboardProjection {
         return obj.getPaymentStatus().equals("Pagamento abatido");
     }
 
-    public void increaseAmountByPaymentStatus(TransportDocumentDTO transportDocument) {
-        if (isPending(transportDocument)) {
-            this.pendingAmountValue += transportDocument.getAmount();
-        } else if(isPaid(transportDocument)) {
-            this.paidAmountValue += transportDocument.getAmount();
-        } else if (isDebated(transportDocument)) {
-            this.debateAmountValue += transportDocument.getAmount();
+    public void increaseAmountByPaymentStatus() {
+        for (TransportDocumentDTO transportDocument : this.transportDocuments) {
+            if (isPending(transportDocument)) {
+                this.pendingAmountValue += transportDocument.getAmount();
+            } else if(isPaid(transportDocument)) {
+                this.paidAmountValue += transportDocument.getAmount();
+            } else if (isDebated(transportDocument)) {
+                this.debateAmountValue += transportDocument.getAmount();
+            }
         }
     }
 
-    public void calculateLeadTime(TransportDocumentDTO transportDocument) {
+    public void calculateLeadTime() {
         var totalLeadTimeScanned = 0;
         var numberOfLeadTimeScanned = 0;
         var totalLeadTimeApproval = 0;
         var numberOfLeadTimeApproval = 0;
 
-        for (InvoiceDTO invoice : transportDocument.getInvoices()) {
-            if (invoice.getScannedDate() != null) {
-                long leadTimeScannedInDays = ChronoUnit.DAYS.between(transportDocument.getIssueDate(), invoice.getScannedDate());
-                totalLeadTimeScanned += leadTimeScannedInDays;
-                numberOfLeadTimeScanned++;
+        for(TransportDocumentDTO transportDocument : this.transportDocuments) {
+            for (InvoiceDTO invoice : transportDocument.getInvoices()) {
+                if (invoice.getScannedDate() != null) {
+                    long leadTimeScannedInDays = ChronoUnit.DAYS.between(transportDocument.getIssueDate(), invoice.getScannedDate());
+                    totalLeadTimeScanned += leadTimeScannedInDays;
+                    numberOfLeadTimeScanned++;
 
-                if(invoice.getPaymentApprovalDate() != null) {
-                    long leadTimeApprovalInDays = ChronoUnit.DAYS.between(invoice.getScannedDate(), invoice.getPaymentApprovalDate());
-                    totalLeadTimeApproval += leadTimeApprovalInDays;
-                    numberOfLeadTimeApproval++;
+                    if(invoice.getPaymentApprovalDate() != null) {
+                        long leadTimeApprovalInDays = ChronoUnit.DAYS.between(invoice.getScannedDate(), invoice.getPaymentApprovalDate());
+                        totalLeadTimeApproval += leadTimeApprovalInDays;
+                        numberOfLeadTimeApproval++;
+                    }
                 }
             }
         }
+
         double averageScannedLeadTime = numberOfLeadTimeScanned > 0 ? totalLeadTimeScanned / (double) numberOfLeadTimeScanned : 0;
         this.setScannedLeadTimeValue((int) Math.round(averageScannedLeadTime));
 

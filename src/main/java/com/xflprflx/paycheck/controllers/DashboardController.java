@@ -25,6 +25,7 @@ public class DashboardController {
 
     @GetMapping()
     public DashboardProjection getDashBoardProjection() {
+
         DashboardProjection dashboardProjection = new DashboardProjection();
         dashboardProjection.setPendingAmountValue(0.0);
         dashboardProjection.setPaidAmountValue(0.0);
@@ -37,10 +38,10 @@ public class DashboardController {
         List<TransportDocumentDTO> transportDocuments = transportDocumentService.findAllTransportDocuments();
         dashboardProjection.getTransportDocuments().addAll(transportDocuments);
 
-        for (TransportDocumentDTO transportDocument : transportDocuments) {
-            dashboardProjection.increaseAmountByPaymentStatus(transportDocument);
-            dashboardProjection.calculateLeadTime(transportDocument);
-        }
+        dashboardProjection.increaseAmountByPaymentStatus();
+
+        dashboardProjection.calculateLeadTime();
+
         return dashboardProjection;
     }
 }
