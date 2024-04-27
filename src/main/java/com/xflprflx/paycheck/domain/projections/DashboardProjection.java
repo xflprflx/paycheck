@@ -1,6 +1,5 @@
 package com.xflprflx.paycheck.domain.projections;
 
-import com.xflprflx.paycheck.domain.Payment;
 import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
 import com.xflprflx.paycheck.domain.dtos.PaymentDTO;
 import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
@@ -16,6 +15,7 @@ public class DashboardProjection {
     private Double debateAmountValue;
     private Integer scannedLeadTimeValue;
     private Integer approvalLeadTimeValue;
+    private Integer paymentLeadTimeValue;
     private List<PaymentDTO> payments = new ArrayList<>();
     private List<TransportDocumentDTO> transportDocuments = new ArrayList<>();
 
@@ -62,6 +62,14 @@ public class DashboardProjection {
         this.approvalLeadTimeValue = approvalLeadTimeValue;
     }
 
+    public Integer getPaymentLeadTimeValue() {
+        return paymentLeadTimeValue;
+    }
+
+    public void setPaymentLeadTimeValue(Integer paymentLeadTimeValue) {
+        this.paymentLeadTimeValue = paymentLeadTimeValue;
+    }
+
     public List<PaymentDTO> getPayments() {
         return payments;
     }
@@ -102,6 +110,8 @@ public class DashboardProjection {
         var numberOfLeadTimeScanned = 0;
         var totalLeadTimeApproval = 0;
         var numberOfLeadTimeApproval = 0;
+        var totalLeadTimePayment = 0;
+        var numberOfLeadTimePayment = 0;
 
         for(TransportDocumentDTO transportDocument : this.transportDocuments) {
             for (InvoiceDTO invoice : transportDocument.getInvoices()) {
@@ -114,6 +124,12 @@ public class DashboardProjection {
                         long leadTimeApprovalInDays = ChronoUnit.DAYS.between(invoice.getScannedDate(), invoice.getPaymentApprovalDate());
                         totalLeadTimeApproval += leadTimeApprovalInDays;
                         numberOfLeadTimeApproval++;
+
+                        if (transportDocument.getPaymentDTO() != null && transportDocument.getPaymentDTO().getPaymentDate() != null) {
+                            long leadTimePaymentInDays = ChronoUnit.DAYS.between(invoice.getPaymentApprovalDate(), transportDocument.getPaymentDTO().getPaymentDate());
+                            totalLeadTimePayment += leadTimePaymentInDays;
+                            numberOfLeadTimePayment++;
+                        }
                     }
                 }
             }
@@ -124,5 +140,8 @@ public class DashboardProjection {
 
         double averageApprovalLeadTime = numberOfLeadTimeApproval > 0 ? totalLeadTimeApproval / (double) numberOfLeadTimeApproval : 0;
         this.setApprovalLeadTimeValue((int) Math.round(averageApprovalLeadTime));
+
+        double averagePaymentLeadTime = numberOfLeadTimePayment > 0 ? totalLeadTimePayment / (double) numberOfLeadTimePayment : 0;
+        this.setPaymentLeadTimeValue((int) Math.round(averagePaymentLeadTime));
     }
 }
