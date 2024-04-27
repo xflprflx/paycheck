@@ -2,6 +2,7 @@ package com.xflprflx.paycheck.domain.projections;
 
 import com.xflprflx.paycheck.domain.Payment;
 import com.xflprflx.paycheck.domain.dtos.InvoiceDTO;
+import com.xflprflx.paycheck.domain.dtos.PaymentDTO;
 import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 
 import java.time.temporal.ChronoUnit;
@@ -15,7 +16,7 @@ public class DashboardProjection {
     private Double debateAmountValue;
     private Integer scannedLeadTimeValue;
     private Integer approvalLeadTimeValue;
-    private List<Payment> payments = new ArrayList<>();
+    private List<PaymentDTO> payments = new ArrayList<>();
     private List<TransportDocumentDTO> transportDocuments = new ArrayList<>();
 
     public DashboardProjection() {
@@ -61,7 +62,7 @@ public class DashboardProjection {
         this.approvalLeadTimeValue = approvalLeadTimeValue;
     }
 
-    public List<Payment> getPayments() {
+    public List<PaymentDTO> getPayments() {
         return payments;
     }
 
