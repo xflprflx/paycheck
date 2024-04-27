@@ -8,6 +8,7 @@ import com.xflprflx.paycheck.domain.enums.PaymentStatus;
 import com.xflprflx.paycheck.factory.FileProcessorFactory;
 import com.xflprflx.paycheck.repositories.InvoiceRepository;
 import com.xflprflx.paycheck.repositories.TransportDocumentRepository;
+import com.xflprflx.paycheck.services.exceptions.PaymentTermsUndefinedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,11 +31,6 @@ public class InvoiceService {
 
 	@Autowired
 	private TransportDocumentRepository transportDocumentRepository;
-
-	@Transactional
-	public Optional<Invoice> findByNumber(String number) {
-		return invoiceRepository.findByNumber(number);
-	}
 
 	@Transactional
 	public Invoice save(Invoice invoice) {
@@ -63,7 +59,11 @@ public class InvoiceService {
 			});
 		}
 		invoiceRepository.saveAll(invoices);
-		updatePaymentForecastIfNeeded(invoices);
+		try {
+			updatePaymentForecastIfNeeded(invoices);
+		} catch (NullPointerException e) {
+			throw new PaymentTermsUndefinedException("Condição de pagamento não definida. \nCadastre a condição de pagamento no menu CONFIGURAÇÕES");
+		}
 	}
 
 	private void updatePaymentForecastIfNeeded(List<Invoice> invoices) {
@@ -82,7 +82,6 @@ public class InvoiceService {
 				transportDocument.setPaymentForecastByScannedDate(newPaymentForecastByScannedDate);
 				transportDocument.setPaymentForecastByPaymentApprovalDate(newPaymentForecastByApprovalDate);
 
-				//transportDocumentRepository.save(transportDocument);
 			}
 			if (transportDocument.getPaymentStatus() != null){
 				if (!transportDocument.getPaymentStatus().equals(PaymentStatus.DEBATE_PAYMENT)) {
@@ -94,12 +93,6 @@ public class InvoiceService {
 		}
 		transportDocumentRepository.saveAll(transportDocumentsToUpdate);
 	}
-
-	@Transactional
-	public void delete(Integer id) {
-		invoiceRepository.deleteById(id);
-	}
-
 
 	public List<InvoiceDTO> returnInvoiceListFromFile(MultipartFile file) throws IOException {
 		String filename = file.getOriginalFilename();

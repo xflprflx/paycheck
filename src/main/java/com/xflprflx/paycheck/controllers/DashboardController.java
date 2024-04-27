@@ -4,8 +4,10 @@ import com.xflprflx.paycheck.domain.dtos.TransportDocumentDTO;
 import com.xflprflx.paycheck.domain.projections.DashboardProjection;
 import com.xflprflx.paycheck.services.PaymentService;
 import com.xflprflx.paycheck.services.TransportDocumentService;
+import com.xflprflx.paycheck.services.exceptions.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -23,7 +25,7 @@ public class DashboardController {
     private TransportDocumentService transportDocumentService;
 
     @GetMapping()
-    public DashboardProjection getDashboardProjection() {
+    public ResponseEntity<DashboardProjection> getDashboardProjection() {
 
         DashboardProjection dashboardProjection = new DashboardProjection();
         dashboardProjection.setPendingAmountValue(0.0);
@@ -35,17 +37,18 @@ public class DashboardController {
         dashboardProjection.getPayments().addAll(paymentService.findAllPaymentDTO());
 
         List<TransportDocumentDTO> transportDocuments = transportDocumentService.findAllTransportDocuments();
+
         dashboardProjection.getTransportDocuments().addAll(transportDocuments);
 
         dashboardProjection.increaseAmountByPaymentStatus();
 
         dashboardProjection.calculateLeadTime();
 
-        return dashboardProjection;
+        return ResponseEntity.ok().body(dashboardProjection);
     }
 
     @GetMapping(value = "/filtered")
-    public DashboardProjection getDashboardProjectionFiltered(
+    public ResponseEntity<DashboardProjection> getDashboardProjectionFiltered(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate issueStart,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate issueEnd,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate scannedStart,
@@ -78,12 +81,16 @@ public class DashboardController {
                 forecastApprStart, forecastApprEnd, approvalStart, approvalEnd,
                 paymentStart, paymentEnd, paymentStatus);
 
+        if (dashboardProjection.getPayments().size() == 0 && transportDocuments.size() == 0) {
+            throw new ObjectNotFoundException("Nenhum registro encontrado");
+        }
+
         dashboardProjection.getTransportDocuments().addAll(transportDocuments);
 
         dashboardProjection.increaseAmountByPaymentStatus();
 
         dashboardProjection.calculateLeadTime();
 
-        return dashboardProjection;
+        return ResponseEntity.ok().body(dashboardProjection);
     }
 }

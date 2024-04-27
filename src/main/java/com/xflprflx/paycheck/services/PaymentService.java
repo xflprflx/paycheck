@@ -44,10 +44,6 @@ public class PaymentService {
 		return savedPayments;
 	}
 
-    public Optional<Payment> findPaymentByNumber(String number) {
-		return paymentRepository.findByNumber(number);
-    }
-
 	@Transactional
     public List<PaymentDTO> findAllPaymentDTO() {
 		List<Payment> payments = paymentRepository.findAll();

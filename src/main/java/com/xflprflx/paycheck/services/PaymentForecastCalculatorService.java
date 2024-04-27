@@ -3,6 +3,7 @@ package com.xflprflx.paycheck.services;
 import com.xflprflx.paycheck.domain.Invoice;
 import com.xflprflx.paycheck.domain.Parameters;
 import com.xflprflx.paycheck.domain.TransportDocument;
+import com.xflprflx.paycheck.services.exceptions.PaymentTermsUndefinedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,9 @@ public class PaymentForecastCalculatorService {
     private ParametersService parametersService;
 
     public LocalDate calculateNewPaymentForecastByScannedDate(TransportDocument transportDocument) {
+
         Parameters parameters = parametersService.getParams();
+        parameters.getPaymentTerms();
         LocalDate latestScannedDate = transportDocument.getInvoices().stream()
                 .map(Invoice::getScannedDate)
                 .max(LocalDate::compareTo)
@@ -38,6 +41,7 @@ public class PaymentForecastCalculatorService {
 
     public LocalDate calculateNewPaymentForecastByPaymentApprovalDate(TransportDocument transportDocument) {
         Parameters parameters = parametersService.getParams();
+        parameters.getPaymentTerms();
         LocalDate latestApprovalDate = transportDocument.getInvoices().stream()
                 .map(Invoice::getPaymentApprovalDate)
                 .max(LocalDate::compareTo)
