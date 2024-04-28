@@ -59,7 +59,7 @@ public class PaymentService {
 	public List<PaymentDTO> findAllFiltered(
 			LocalDate issueStart, LocalDate issueEnd, LocalDate scannedStart, LocalDate scannedEnd, LocalDate forecastScStart, LocalDate forecastScEnd,
 			LocalDate forecastApprStart, LocalDate forecastApprEnd, LocalDate approvalStart, LocalDate approvalEnd,
-			LocalDate paymentStart, LocalDate paymentEnd, Integer paymentStatus) {
+			LocalDate paymentStart, LocalDate paymentEnd, List<Integer> paymentStatuses) {
 
 		Specification<Payment> spec = Specification.where(null);
 		if (issueStart != null && issueEnd != null) {
@@ -89,8 +89,9 @@ public class PaymentService {
 				return builder.between(root.get("paymentDate"), paymentStart, paymentEnd);
 			});
 		}
-		if(paymentStatus != null) {
-			spec = spec.and((root, query, builder) -> builder.equal(root.join("transportDocument").get("paymentStatus"), PaymentStatus.toEnum(paymentStatus)));
+
+		if(paymentStatuses != null && !paymentStatuses.isEmpty()) {
+			spec = spec.and((root, query, builder) -> root.join("transportDocument").get("paymentStatus").in(paymentStatusesStringToPaymentStatusList(paymentStatuses)));
 		}
 
 		List<Payment>  payments = paymentRepository.findAll(spec);
@@ -102,5 +103,10 @@ public class PaymentService {
 	public List<Payment> findPaymentsWithoutDoc() {
 		List<Payment> docsNull = paymentRepository.findWhereDocIsNUll();
 		return docsNull;
+	}
+
+	private List<PaymentStatus> paymentStatusesStringToPaymentStatusList(List<Integer> paymentStatuses) {
+		List<PaymentStatus> paymentStatusList = paymentStatuses.stream().map(x -> PaymentStatus.toEnum(x)).collect(Collectors.toList());
+		return paymentStatusList;
 	}
 }

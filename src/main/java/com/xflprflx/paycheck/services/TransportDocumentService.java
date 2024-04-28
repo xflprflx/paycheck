@@ -20,6 +20,7 @@ import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -199,7 +200,7 @@ public class TransportDocumentService {
 	public List<TransportDocumentDTO> findAllFiltered(
 			LocalDate issueStart, LocalDate issueEnd, LocalDate scannedStart, LocalDate scannedEnd, LocalDate forecastScStart, LocalDate forecastScEnd,
 			LocalDate forecastApprStart, LocalDate forecastApprEnd, LocalDate approvalStart, LocalDate approvalEnd,
-			LocalDate paymentStart, LocalDate paymentEnd, Integer paymentStatus) {
+			LocalDate paymentStart, LocalDate paymentEnd, List<Integer> paymentStatuses) {
 
 		Specification<TransportDocument> spec = Specification.where(null);
 		if (issueStart != null && issueEnd != null) {
@@ -229,8 +230,9 @@ public class TransportDocumentService {
 				return builder.between(root.join("payment").get("paymentDate"), paymentStart, paymentEnd);
 			});
 		}
-		if(paymentStatus != null) {
-			spec = spec.and((root, query, builder) -> builder.equal(root.get("paymentStatus"), PaymentStatus.toEnum(paymentStatus)));
+
+		if(paymentStatuses != null && !paymentStatuses.isEmpty()) {
+			spec = spec.and((root, query, builder) -> root.get("paymentStatus").in(paymentStatusesStringToPaymentStatusList(paymentStatuses)));
 		}
 
 		List<TransportDocument>  transportDocuments = transportDocumentRepository.findAll(spec);
@@ -242,5 +244,10 @@ public class TransportDocumentService {
 		String filename = file.getOriginalFilename();
 		FileProcessor fileProcessor = FileProcessorFactory.getFileProcessor(filename);
 		return fileProcessor.returnTransportDocumentListFromFile(file);
+	}
+
+	private List<PaymentStatus> paymentStatusesStringToPaymentStatusList(List<Integer> paymentStatuses) {
+		List<PaymentStatus> paymentStatusList = paymentStatuses.stream().map(x -> PaymentStatus.toEnum(x)).collect(Collectors.toList());
+		return paymentStatusList;
 	}
 }
