@@ -61,7 +61,7 @@ public class DashboardController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate approvalEnd,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentStart,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentEnd,
-            @RequestParam(required = false) Integer paymentStatus) {
+            @RequestParam(required = false, name = "paymentStatus") List<Integer> paymentStatuses) {
 
         DashboardProjection dashboardProjection = new DashboardProjection();
         dashboardProjection.setPendingAmountValue(0.0);
@@ -73,13 +73,13 @@ public class DashboardController {
         dashboardProjection.getPayments().addAll(paymentService.findAllFiltered(issueStart, issueEnd,
                 scannedStart, scannedEnd, forecastScStart, forecastScEnd,
                 forecastApprStart, forecastApprEnd, approvalStart, approvalEnd,
-                paymentStart, paymentEnd, paymentStatus));
+                paymentStart, paymentEnd, paymentStatuses));
 
         List<TransportDocumentDTO> transportDocuments =
                 transportDocumentService.findAllFiltered(issueStart, issueEnd,
                 scannedStart, scannedEnd, forecastScStart, forecastScEnd,
                 forecastApprStart, forecastApprEnd, approvalStart, approvalEnd,
-                paymentStart, paymentEnd, paymentStatus);
+                paymentStart, paymentEnd, paymentStatuses);
 
         if (dashboardProjection.getPayments().size() == 0 && transportDocuments.size() == 0) {
             throw new ObjectNotFoundException("Nenhum registro encontrado");

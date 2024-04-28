@@ -57,12 +57,12 @@ public class PaymentController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate approvalEnd,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentStart,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentEnd,
-            @RequestParam(required = false) Integer paymentStatus) {
+            @RequestParam(required = false) List<Integer> paymentStatuses) {
         List<PaymentDTO> paymentDTOS =
                 paymentService.findAllFiltered(issueStart, issueEnd,
                         scannedStart, scannedEnd, forecastScStart, forecastScEnd,
                         forecastApprStart, forecastApprEnd, approvalStart, approvalEnd,
-                        paymentStart, paymentEnd, paymentStatus);
+                        paymentStart, paymentEnd, paymentStatuses);
         return ResponseEntity.ok().body(paymentDTOS);
     }
 
